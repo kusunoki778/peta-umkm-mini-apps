@@ -56,6 +56,7 @@ CREATE TABLE "businesses" (
     "longitude" DOUBLE PRECISION,
     "earth_location" earth,
     "status" "BusinessStatus" NOT NULL DEFAULT 'pending',
+    "rejection_reason" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),

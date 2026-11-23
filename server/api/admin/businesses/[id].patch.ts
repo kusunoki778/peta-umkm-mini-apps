@@ -12,5 +12,8 @@ export default defineEventHandler(async (event) => {
   if (!parsed.success) return fail(422, 'Status moderasi tidak valid.', parsed.error.flatten())
   const business = await prisma.business.findUnique({ where: { id } })
   if (!business) return fail(404, 'Lapak tidak ditemukan.')
-  return prisma.business.update({ where: { id }, data: { status: parsed.data.status } })
+  return prisma.business.update({
+    where: { id },
+    data: { status: parsed.data.status, rejectionReason: parsed.data.status === 'rejected' ? parsed.data.reason ?? null : null },
+  })
 })

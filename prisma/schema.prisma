@@ -88,6 +88,7 @@ model Business {
   // Titik bumi untuk indeks GiST (earthdistance). Diisi trigger di migrasi.
   earthLocation Unsupported("earth")? @map("earth_location")
   status      BusinessStatus                        @default(pending)
+  rejectionReason String?                            @map("rejection_reason")
   createdAt   DateTime                              @default(now()) @map("created_at")
   updatedAt   DateTime                              @updatedAt @map("updated_at")
   deletedAt   DateTime?                             @map("deleted_at")
