@@ -47,15 +47,15 @@ Estimasi: 4 sampai 5 hari.
 
 ## Fase 3 - Peta dan Pencarian (GIS)
 
-- [ ] Komponen peta Leaflet yang hanya berjalan di klien
-- [ ] Marker kategori memakai `divIcon` sesuai desain
-- [ ] Pengelompokan marker (clustering)
-- [ ] Filter kategori multi-pilih, tersinkron dengan peta dan daftar
-- [ ] Pencarian nama dengan jeda
-- [ ] Pencarian sekitar saya dengan izin lokasi dan penanganan penolakan
-- [ ] Halaman detail lapak
-- [ ] Urutan daftar memakai query PostGIS (di dev sudah jalan lewat `cube` + `earthdistance`)
-- [ ] Keadaan loading, empty, dan error untuk peta dan daftar
+- [x] Komponen peta Leaflet yang hanya berjalan di klien
+- [x] Marker kategori memakai `divIcon` sesuai desain
+- [x] Pengelompokan marker (clustering)
+- [x] Filter kategori multi-pilih, tersinkron dengan peta dan daftar
+- [x] Pencarian nama dengan jeda
+- [x] Pencarian sekitar saya dengan izin lokasi dan penanganan penolakan
+- [x] Halaman detail lapak
+- [x] Urutan daftar memakai query PostGIS (di dev sudah jalan lewat `cube` + `earthdistance`)
+- [x] Keadaan loading, empty, dan error untuk peta dan daftar
 
 Estimasi: 4 sampai 5 hari.
 
