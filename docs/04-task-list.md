@@ -31,15 +31,17 @@ Estimasi: 3 sampai 4 hari.
 
 ## Fase 2 - CRUD Lapak
 
-- [ ] Endpoint daftar, detail, tambah, ubah, dan hapus lapak
-- [ ] Validasi input memakai Zod
-- [ ] Form tambah lapak dengan pemilih titik di peta
+- [x] Endpoint daftar, detail, tambah, ubah, dan hapus lapak
+- [x] Validasi input memakai Zod
+- [ ] Form tambah lapak dengan pemilih titik di peta (sementara masih input lintang dan bujur manual plus tombol "Pakai lokasi saya sekarang"; pemilih titik di peta menyusul bersama komponen peta di Fase 3)
 - [ ] Unggah foto dengan validasi dan pengecilan ukuran
-- [ ] Pengelolaan item menu atau layanan
-- [ ] Pengaturan jam buka
-- [ ] Dashboard pemilik: daftar lapak, status verifikasi, aksi
-- [ ] Hapus lunak
-- [ ] Pembatasan akses: pemilik hanya mengelola lapaknya sendiri
+- [x] Pengelolaan item menu atau layanan
+- [x] Pengaturan jam buka
+- [x] Dashboard pemilik: daftar lapak, status verifikasi, aksi
+- [x] Hapus lunak
+- [x] Pembatasan akses: pemilik hanya mengelola lapaknya sendiri
+
+Catatan teknis penting: seluruh berkas rute di bawah `server/api/businesses` memakai satu nama parameter segmen, yaitu `:key`, yang menerima id maupun slug. Alasannya, router Nitro (`radix3`) gagal mencocokkan rute bersarang seperti `/api/businesses/:id/items` bila di posisi segmen yang sama ada dua nama parameter berbeda (`:id` dan `:slug`); permintaan lalu jatuh ke renderer Vue dan muncul sebagai 404. Jangan mengembalikan pemisahan `[id]` dan `[slug]` tanpa menguji ulang.
 
 Estimasi: 4 sampai 5 hari.
 
@@ -52,7 +54,7 @@ Estimasi: 4 sampai 5 hari.
 - [ ] Pencarian nama dengan jeda
 - [ ] Pencarian sekitar saya dengan izin lokasi dan penanganan penolakan
 - [ ] Halaman detail lapak
-- [ ] Urutan daftar memakai query PostGIS
+- [ ] Urutan daftar memakai query PostGIS (di dev sudah jalan lewat `cube` + `earthdistance`)
 - [ ] Keadaan loading, empty, dan error untuk peta dan daftar
 
 Estimasi: 4 sampai 5 hari.

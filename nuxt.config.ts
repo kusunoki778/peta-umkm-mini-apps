@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     // deployment sungguhan (https) membiarkan bawaan Secure.
     session: {
       cookie: {
-        secure: process.env.NUXT_SESSION_COOKIE_SECURE === 'false' ? false : 'true',
+        secure: process.env.NUXT_SESSION_COOKIE_SECURE === 'false' ? false : undefined,
       },
     },
     public: {
