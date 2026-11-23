@@ -3,9 +3,19 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/fonts', '@nuxt/eslint'],
+  modules: ['@nuxt/fonts', '@nuxt/eslint', 'nuxt-auth-utils'],
   runtimeConfig: {
     midtransServerKey: '',
+    // nuxt-auth-utils menyetel cookie sesi `Secure` secara bawaan. Saat pratinjau
+    // build produksi di mesin lokal, aplikasi disajikan lewat http, jadi cookie
+    // itu ditolak browser dan pengguna tidak pernah benar-benar masuk.
+    // Aktifkan NUXT_SESSION_COOKIE_SECURE=false hanya untuk pratinjau lokal;
+    // deployment sungguhan (https) membiarkan bawaan Secure.
+    session: {
+      cookie: {
+        secure: process.env.NUXT_SESSION_COOKIE_SECURE === 'false' ? false : 'true',
+      },
+    },
     public: {
       midtransClientKey: '',
       midtransIsProduction: false,

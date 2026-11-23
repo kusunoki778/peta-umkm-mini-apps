@@ -7,12 +7,12 @@ Daftar tugas dikelompokkan per fase. Tanda centang menandai pekerjaan yang sudah
 - [x] Inisialisasi proyek Nuxt 4 dengan TypeScript
 - [x] Pasang Tailwind CSS v4 dan siapkan token desain dari `docs/01-desain.md`
 - [x] Pasang dan konfigurasi Prisma (schema, client, `prisma7.config.ts`)
-- [ ] Aktifkan ekstensi PostGIS di basis data (butuh PostgreSQL lokal)
+- [x] Aktifkan ekstensi geospasial di basis data (PostGIS tidak tersedia di mesin dev, dipakai `cube` + `earthdistance` dengan indeks GiST; PostGIS tetap jalur produksi)
 - [x] Buat `.env.example` dan sambungkan kunci yang dibutuhkan
 - [x] Siapkan ESLint
 - [ ] Siapkan Prettier
 - [x] Inisialisasi Git dan sambungkan ke repositori (push menunggu repo GitHub dibuat)
-- [ ] Tulis skrip seed untuk lapak contoh
+- [x] Tulis skrip seed untuk lapak contoh
 
 Estimasi: 1 hari.
 
@@ -21,10 +21,10 @@ Estimasi: 1 hari.
 - [ ] Layout dasar (header, peta, panel daftar) untuk desktop dan mobile
 - [ ] Komponen dasar: Button, Chip, Sheet, EmptyState, LoadingSkeleton, Toast
 - [ ] Tema terang dan gelap dengan pengalih yang benar-benar bekerja
-- [ ] Skema Prisma untuk users, categories, businesses, dan tabel pendukung
-- [ ] Migrasi pertama dan jalankan seed
-- [ ] Registrasi, login, logout, dan sesi
-- [ ] Middleware peran (pemilik dan admin)
+- [x] Skema Prisma untuk users, categories, businesses, dan tabel pendukung
+- [x] Migrasi pertama dan jalankan seed
+- [x] Registrasi, login, logout, dan sesi
+- [x] Middleware peran (pemilik dan admin)
 - [ ] Halaman 403 dan 404
 
 Estimasi: 3 sampai 4 hari.
