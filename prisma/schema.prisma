@@ -1,0 +1,193 @@
+// Skema database Lapak Peta.
+// Rancangan lengkap ada di docs/03-arsitektur.md.
+//
+// Catatan PostGIS: kolom `location` bertipe geography(Point, 4326) dan
+// diakses lewat raw SQL (ST_DWithin, ST_Distance). Prisma tidak punya tipe
+// geografi bawaan, jadi kolomnya ditandai Unsupported.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  owner
+  admin
+}
+
+enum BusinessStatus {
+  pending
+  live
+  rejected
+  inactive
+}
+
+enum BoostStatus {
+  pending
+  active
+  expired
+  failed
+}
+
+enum PaymentStatus {
+  pending
+  settled
+  expired
+  failed
+  refunded
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  phone        String?
+  role         Role     @default(owner)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  businesses Business[]
+
+  @@map("users")
+}
+
+model Category {
+  id    Int     @id @default(autoincrement())
+  slug  String  @unique
+  name  String
+  color String
+  icon  String?
+  sort  Int     @default(0)
+
+  businesses Business[]
+
+  @@map("categories")
+}
+
+model Business {
+  id          String                                @id @default(cuid())
+  ownerId     String                                @map("owner_id")
+  categoryId  Int                                   @map("category_id")
+  name        String
+  slug        String                                @unique
+  description String?
+  address     String
+  phone       String?
+  whatsapp    String?
+  location    Unsupported("geography(Point, 4326)")
+  status      BusinessStatus                        @default(pending)
+  createdAt   DateTime                              @default(now()) @map("created_at")
+  updatedAt   DateTime                              @updatedAt @map("updated_at")
+  deletedAt   DateTime?                             @map("deleted_at")
+
+  owner    User            @relation(fields: [ownerId], references: [id])
+  category Category        @relation(fields: [categoryId], references: [id])
+  photos   BusinessPhoto[]
+  items    BusinessItem[]
+  hours    OpeningHour[]
+  boosts   Boost[]
+
+  @@index([categoryId])
+  @@index([ownerId])
+  @@index([status])
+  @@map("businesses")
+}
+
+model BusinessPhoto {
+  id         String   @id @default(cuid())
+  businessId String   @map("business_id")
+  url        String
+  alt        String?
+  sort       Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@map("business_photos")
+}
+
+// Menu atau layanan yang ditawarkan lapak.
+model BusinessItem {
+  id          String  @id @default(cuid())
+  businessId  String  @map("business_id")
+  name        String
+  price       Int?
+  description String?
+  sort        Int     @default(0)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@map("business_items")
+}
+
+// day: 0 = Minggu sampai 6 = Sabtu. Waktu format "HH:mm".
+model OpeningHour {
+  id         String  @id @default(cuid())
+  businessId String  @map("business_id")
+  day        Int
+  openTime   String  @map("open_time")
+  closeTime  String  @map("close_time")
+  closed     Boolean @default(false)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, day])
+  @@map("opening_hours")
+}
+
+model BoostPackage {
+  id           Int     @id @default(autoincrement())
+  name         String
+  durationDays Int     @map("duration_days")
+  price        Int
+  features     Json?
+  sort         Int     @default(0)
+  active       Boolean @default(true)
+
+  boosts Boost[]
+
+  @@map("boost_packages")
+}
+
+model Boost {
+  id         String      @id @default(cuid())
+  businessId String      @map("business_id")
+  packageId  Int         @map("package_id")
+  status     BoostStatus @default(pending)
+  startsAt   DateTime?   @map("starts_at")
+  endsAt     DateTime?   @map("ends_at")
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  business Business     @relation(fields: [businessId], references: [id])
+  package  BoostPackage @relation(fields: [packageId], references: [id])
+  payments Payment[]
+
+  @@index([businessId, status])
+  @@map("boosts")
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  orderId     String        @unique @map("order_id")
+  boostId     String        @map("boost_id")
+  amount      Int
+  status      PaymentStatus @default(pending)
+  method      String?
+  snapToken   String?       @map("snap_token")
+  rawResponse Json?         @map("raw_response")
+  paidAt      DateTime?     @map("paid_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  boost Boost @relation(fields: [boostId], references: [id])
+
+  @@index([boostId])
+  @@map("payments")
+}

@@ -2,7 +2,7 @@
 
 ## 1. Gambaran Sistem
 
-Aplikasi satu repo dengan Nuxt 3. UI berjalan di browser, logika server (API, webhook, akses basis data) berjalan di server Nitro di dalam proyek Nuxt yang sama.
+Aplikasi satu repo dengan Nuxt 4. UI berjalan di browser, logika server (API, webhook, akses basis data) berjalan di server Nitro di dalam proyek Nuxt yang sama.
 
 ```
 +-------------------------------------------------------------+
@@ -12,7 +12,7 @@ Aplikasi satu repo dengan Nuxt 3. UI berjalan di browser, logika server (API, we
                                | HTTP (JSON, cookie sesi)
                                v
 +-------------------------------------------------------------+
-|  Server Nitro (di dalam Nuxt 3)                             |
+|  Server Nitro (di dalam Nuxt 4)                             |
 |  - server/api/*  (endpoint REST)                            |
 |  - Autentikasi peran, validasi input                        |
 |  - Akses basis data lewat Prisma                            |
@@ -35,7 +35,7 @@ Aplikasi satu repo dengan Nuxt 3. UI berjalan di browser, logika server (API, we
 
 | Lapis | Pilihan | Alasan |
 |---|---|---|
-| Framework | Nuxt 3 | Satu proyek untuk UI dan server API, SSR untuk SEO halaman detail lapak, TypeScript menyeluruh. |
+| Framework | Nuxt 4 | Satu proyek untuk UI dan server API, SSR untuk SEO halaman detail lapak, TypeScript menyeluruh. |
 | Bahasa | TypeScript | Tipe kuat dari basis data sampai UI, cocok untuk portofolio yang rapi. |
 | UI | Vue 3 + Tailwind CSS | Komponen reaktif untuk peta dan filter, Tailwind mempercepat konsistensi desain. |
 | Peta | Leaflet + OpenStreetMap | Gratis, tanpa kunci API, banyak referensi. |
@@ -50,39 +50,42 @@ Aplikasi satu repo dengan Nuxt 3. UI berjalan di browser, logika server (API, we
 
 ```
 peta-umkm-mini-apps/
-├── app.vue
-├── nuxt.config.ts
-├── tailwind.config.ts
-├── assets/
-│   └── css/main.css
-├── components/
-│   ├── map/            (MapCanvas, MapMarker, MarkerCluster)
-│   ├── business/       (BusinessCard, BusinessForm, BusinessDetail)
-│   ├── boost/          (BoostSticker, BoostCheckout)
-│   └── ui/             (Button, Chip, Sheet, EmptyState, Toast)
-├── composables/
-│   ├── useBusinesses.ts
-│   ├── useMap.ts
-│   └── useBoost.ts
-├── layouts/
-│   ├── default.vue
-│   ├── dashboard.vue
-│   └── admin.vue
-├── middleware/
-│   ├── auth.ts
-│   └── admin.ts
-├── pages/
-│   ├── index.vue            (peta utama)
-│   ├── lapak/[id].vue       (detail lapak)
-│   ├── masuk.vue
-│   ├── daftar.vue
-│   ├── kelola/index.vue     (dashboard pemilik)
-│   ├── kelola/lapak/baru.vue
-│   ├── kelola/lapak/[id].vue
-│   └── admin/
-│       ├── index.vue
-│       └── transaksi.vue
-├── server/
+├── app/                     (root aplikasi Nuxt 4)
+│   ├── app.vue
+│   ├── assets/
+│   │   └── css/main.css     (token desain Tailwind v4)
+│   ├── components/
+│   │   ├── map/            (MapCanvas, MapMarker, MarkerCluster)
+│   │   ├── business/       (BusinessCard, BusinessForm, BusinessDetail)
+│   │   ├── boost/          (BoostSticker, BoostCheckout)
+│   │   └── ui/             (Button, Chip, Sheet, EmptyState, Toast)
+│   ├── composables/
+│   │   ├── useBusinesses.ts
+│   │   ├── useMap.ts
+│   │   └── useBoost.ts
+│   ├── layouts/
+│   │   ├── default.vue
+│   │   ├── dashboard.vue
+│   │   └── admin.vue
+│   ├── middleware/
+│   │   ├── auth.ts
+│   │   └── admin.ts
+│   ├── pages/
+│   │   ├── index.vue            (peta utama)
+│   │   ├── lapak/[id].vue       (detail lapak)
+│   │   ├── masuk.vue
+│   │   ├── daftar.vue
+│   │   ├── kelola/index.vue     (dashboard pemilik)
+│   │   ├── kelola/lapak/baru.vue
+│   │   ├── kelola/lapak/[id].vue
+│   │   └── admin/
+│   │       ├── index.vue
+│   │       └── transaksi.vue
+│   ├── stores/
+│   │   ├── filters.ts
+│   │   └── session.ts
+│   └── generated/prisma/    (client Prisma hasil generate, tidak di-commit)
+├── server/                  (endpoint Nitro, tetap di root proyek)
 │   ├── api/
 │   │   ├── auth/
 │   │   ├── businesses/
@@ -96,18 +99,19 @@ peta-umkm-mini-apps/
 │       ├── auth.ts
 │       ├── validation.ts
 │       └── geo.ts
-├── stores/
-│   ├── filters.ts
-│   └── session.ts
-├── types/
 ├── prisma/
 │   ├── schema.prisma
 │   ├── migrations/
 │   └── seed.ts
 ├── public/
 │   └── uploads/
-└── docs/
+├── docs/
+├── nuxt.config.ts
+├── prisma7.config.ts        (konfigurasi Prisma 7)
+└── eslint.config.mjs
 ```
+
+Catatan versi: proyek memakai Nuxt 4, jadi halaman, komponen, layout, dan composable berada di dalam `app/`, sementara endpoint `server/` tetap di root. Tailwind CSS v4 memakai pendekatan CSS-first, sehingga tidak ada `tailwind.config.ts`: token desain ditulis di `app/assets/css/main.css` lewat `@theme`.
 
 ## 4. Model Data
 
@@ -306,7 +310,7 @@ UPLOAD_DIR="public/uploads"
 
 | Keputusan | Alasan |
 |---|---|
-| Nuxt 3 satu proyek, bukan dua aplikasi | Mengurangi kerumitan CORS dan deploy, dan satu bahasa untuk seluruh kode. |
+| Nuxt 4 satu proyek, bukan dua aplikasi | Mengurangi kerumitan CORS dan deploy, dan satu bahasa untuk seluruh kode. |
 | PostGIS, bukan pencarian jarak di aplikasi | Query radius dan urutan jarak lebih akurat dan cepat, serta menunjukkan kemampuan basis data. |
 | Prisma dengan SQL mentah untuk geospasial | Prisma memudahkan CRUD dan migrasi; query PostGIS yang tidak didukung ditulis sebagai SQL mentah. |
 | Gaya marker lewat `divIcon` | Membuat marker emas dan denyut boost bisa ditata dengan CSS yang sama seperti komponen lain. |

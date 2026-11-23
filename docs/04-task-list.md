@@ -4,13 +4,14 @@ Daftar tugas dikelompokkan per fase. Tanda centang menandai pekerjaan yang sudah
 
 ## Fase 0 - Persiapan
 
-- [ ] Inisialisasi proyek Nuxt 3 dengan TypeScript
-- [ ] Pasang Tailwind CSS dan siapkan token desain dari `docs/01-desain.md`
-- [ ] Pasang dan konfigurasi Prisma
-- [ ] Aktifkan ekstensi PostGIS di basis data
-- [ ] Buat `.env.example` dan sambungkan kunci yang dibutuhkan
-- [ ] Siapkan ESLint dan Prettier
-- [ ] Inisialisasi Git dan sambungkan ke repositori
+- [x] Inisialisasi proyek Nuxt 4 dengan TypeScript
+- [x] Pasang Tailwind CSS v4 dan siapkan token desain dari `docs/01-desain.md`
+- [x] Pasang dan konfigurasi Prisma (schema, client, `prisma7.config.ts`)
+- [ ] Aktifkan ekstensi PostGIS di basis data (butuh PostgreSQL lokal)
+- [x] Buat `.env.example` dan sambungkan kunci yang dibutuhkan
+- [x] Siapkan ESLint
+- [ ] Siapkan Prettier
+- [x] Inisialisasi Git dan sambungkan ke repositori (push menunggu repo GitHub dibuat)
 - [ ] Tulis skrip seed untuk lapak contoh
 
 Estimasi: 1 hari.

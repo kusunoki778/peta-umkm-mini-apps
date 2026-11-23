@@ -13,6 +13,7 @@ node_modules
 .output
 .nitro
 .cache
+.data
 dist
 
 # env
@@ -37,7 +38,10 @@ Thumbs.db
 # prisma
 prisma/*.db
 prisma/migrations/dev.db
+/app/generated/
 
 # uploads (dev)
 public/uploads/*
 !public/uploads/.gitkeep
+
+/app/generated/prisma

@@ -2,7 +2,7 @@
 
 Peta interaktif untuk menemukan tempat makan, kos, dan jasa di sekitar kampus. Pemilik usaha bisa mendaftarkan lapaknya, lalu membayar paket boost supaya lapaknya menonjol di peta dan muncul di atas daftar rekomendasi.
 
-Status proyek: **tahap perencanaan**. Dokumen desain, PRD, arsitektur, dan task list sudah tersusun. Kode aplikasi belum ditulis. Tangkapan layar dan tautan demo akan ditambahkan setelah aplikasi berjalan.
+Status proyek: **kerangka aplikasi berjalan**. Dokumen desain, PRD, arsitektur, dan task list sudah tersusun, dan Fase 0 (scaffold Nuxt 4, Tailwind, Prisma) selesai. Fitur produk belum dikerjakan. Tangkapan layar dan tautan demo akan ditambahkan setelah peta berjalan.
 
 ## Masalah yang Dipecahkan
 
@@ -18,7 +18,7 @@ Pendatang seperti mahasiswa baru kesulitan menemukan tempat makan, kos, atau ben
 
 ## Tumpukan Teknologi
 
-- Nuxt 3, Vue 3, TypeScript
+- Nuxt 4, Vue 3, TypeScript
 - Tailwind CSS
 - PostgreSQL dan PostGIS
 - Prisma
@@ -47,11 +47,24 @@ Pemilik -> Pilih paket -> Server buat Snap token -> Midtrans Snap (bayar)
 
 ## Menjalankan Proyek
 
-Belum tersedia. Langkah menjalankan akan diisi setelah aplikasi di-scaffold pada Fase 0 dan 1 (lihat [docs/04-task-list.md](docs/04-task-list.md)).
+Butuh Node.js 20 atau lebih baru, dan PostgreSQL dengan ekstensi PostGIS aktif.
+
+```bash
+npm install
+cp .env.example .env        # Windows: copy .env.example .env
+# lalu isi DATABASE_URL dan NUXT_SESSION_PASSWORD di .env
+npm run db:generate         # generate Prisma Client
+npm run db:migrate          # buat tabel (butuh PostgreSQL + PostGIS aktif)
+npm run dev                 # buka http://localhost:3000
+```
+
+Skrip lain: `npm run build`, `npm run lint`, `npm run typecheck`, `npm run db:studio`.
+
+Saat ini aplikasi baru menampilkan kerangka halaman. Peta, autentikasi, dan alur boost menyusul pada fase berikutnya (lihat [docs/04-task-list.md](docs/04-task-list.md)).
 
 ## Rencana Selanjutnya
 
-- [ ] Scaffold proyek dan token desain
+- [x] Scaffold proyek dan token desain
 - [ ] Autentikasi dan CRUD lapak
 - [ ] Peta dan pencarian
 - [ ] Boost dan pembayaran

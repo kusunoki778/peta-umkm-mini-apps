@@ -4,7 +4,7 @@ Dokumen ini menjawab pertanyaan: bahasa dan alat apa yang paling cocok untuk pro
 
 ## Ringkasan Saran
 
-Satu bahasa untuk frontend dan backend: **TypeScript di atas Nuxt 3**. Bahasa kueri: **SQL (PostgreSQL + PostGIS)**.
+Satu bahasa untuk frontend dan backend: **TypeScript di atas Nuxt 4**. Bahasa kueri: **SQL (PostgreSQL + PostGIS)**.
 
 Alasannya: hampir seluruh pekerjaan proyek ini adalah UI dan data, bukan beban komputasi berat. Memakai TypeScript dari basis data sampai tampilan memberi tipe yang konsisten, satu alat build, satu proses deploy, dan lebih sedikit hal yang bisa salah. Nilai jual portofolionya justru pada alur penuh yang rapi (autentikasi, CRUD, geospasial, pembayaran, admin), dan itu paling cepat terlihat dengan satu tumpukan yang koheren.
 
@@ -13,7 +13,7 @@ Alasannya: hampir seluruh pekerjaan proyek ini adalah UI dan data, bukan beban k
 | Kebutuhan | Pilihan | Alternatif | Alasan pilihan |
 |---|---|---|---|
 | Bahasa utama | TypeScript | JavaScript | Tipe mencegah bug di batas server dan klien, dan jadi nilai tambah di portofolio. |
-| Framework | Nuxt 3 | Next.js (React) | Vue dipilih pemilik; Nuxt memberi UI dan server API dalam satu proyek dan SSR untuk SEO. |
+| Framework | Nuxt 4 | Next.js (React) | Vue dipilih pemilik; Nuxt memberi UI dan server API dalam satu proyek dan SSR untuk SEO. |
 | Gaya | Tailwind CSS | CSS Modules, UnoCSS | Cepat dan konsisten, cocok dengan token desain yang sudah ditetapkan. |
 | Basis data | PostgreSQL + PostGIS | MySQL, MongoDB | PostGIS memberi pencarian radius dan jarak yang benar. |
 | ORM | Prisma | Drizzle, SQL mentah | Mudah dibaca dan migrasi jelas; query geospasial tetap SQL mentah. |

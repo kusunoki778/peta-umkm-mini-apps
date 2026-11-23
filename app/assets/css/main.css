@@ -1,0 +1,65 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  Token desain. Sumbernya docs/01-desain.md.
+  Palet: 2 warna inti (primary + netral) dan 1 aksen (accent) untuk boost.
+  Warna kategori adalah encoding data, hanya dipakai di pin, legend, dan chip.
+*/
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+
+  --color-paper: #f7f4ef;
+  --color-surface: #ffffff;
+  --color-ink: #1c1917;
+  --color-muted: #6b6459;
+  --color-border: #e4ded4;
+
+  --color-primary: #0f6b4f;
+  --color-accent: #e8a317;
+  --color-danger: #c2412d;
+
+  --color-cat-kuliner: #e4572e;
+  --color-cat-kos: #2e6bb0;
+  --color-cat-bengkel: #5a6472;
+  --color-cat-jasa: #7a4fb5;
+
+  --radius-tag: 0.5rem;
+}
+
+@layer base {
+  .dark {
+    --color-paper: #15130f;
+    --color-surface: #1f1c17;
+    --color-ink: #f5f2ec;
+    --color-muted: #a8a093;
+    --color-border: #332e26;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  /* Semua kontrol yang aktif menunjukkan bisa diklik (R-39). */
+  :where(a, button, [role='button'], label, summary, select, input[type='checkbox'], input[type='radio']):not(:disabled) {
+    cursor: pointer;
+  }
+
+  :disabled {
+    cursor: not-allowed;
+  }
+
+  /* Indikator fokus terlihat jelas, tidak pernah dihapus tanpa pengganti (R-32). */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
