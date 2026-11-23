@@ -154,8 +154,20 @@ async function submit() {
       <fieldset class="rounded-xl border border-border bg-surface p-4">
         <legend class="px-1 text-sm font-medium text-ink">Titik lokasi</legend>
         <p class="text-sm text-muted">
-          Lapak ditampilkan di peta berdasarkan koordinat ini.
+          Klik titik lapakmu di peta. Koordinat akan terisi otomatis.
         </p>
+
+        <ClientOnly>
+          <PemilihTitik
+            :latitude="form.latitude === '' ? null : Number(form.latitude)"
+            :longitude="form.longitude === '' ? null : Number(form.longitude)"
+            class="mt-3"
+            @pilih="(latitude, longitude) => { form.latitude = String(latitude); form.longitude = String(longitude) }"
+          />
+          <template #fallback>
+            <div class="mt-3 flex h-64 items-center justify-center rounded-lg border border-border bg-surface text-sm text-muted">Memuat peta pemilih titik...</div>
+          </template>
+        </ClientOnly>
 
         <div class="mt-3 grid gap-4 sm:grid-cols-2">
           <AppField
@@ -164,7 +176,7 @@ async function submit() {
             label="Lintang (latitude)"
             type="number"
             required
-            hint="Contoh: -6.891500"
+             hint="Terisi dari klik peta, masih bisa diedit."
           />
           <AppField
             id="lapak-bujur"
@@ -172,7 +184,7 @@ async function submit() {
             label="Bujur (longitude)"
             type="number"
             required
-            hint="Contoh: 107.610700"
+             hint="Terisi dari klik peta, masih bisa diedit."
           />
         </div>
 

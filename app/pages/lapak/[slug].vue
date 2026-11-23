@@ -101,6 +101,12 @@ const nomorWhatsapp = computed(() => {
     </div>
 
     <article v-else-if="lapak">
+      <NuxtLink
+        to="/"
+        class="mb-6 inline-flex min-h-11 items-center rounded-tag border border-border bg-surface px-3 text-sm font-medium text-ink hover:border-primary hover:text-primary"
+      >
+        Kembali ke peta
+      </NuxtLink>
       <div class="flex items-center gap-2 text-sm">
         <span class="flex items-center gap-1.5 text-muted">
           <span class="size-2.5 rounded-full" :style="{ backgroundColor: lapak.category.color }" aria-hidden="true" />
