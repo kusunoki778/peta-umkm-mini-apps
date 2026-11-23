@@ -77,11 +77,11 @@ Estimasi: 4 sampai 5 hari.
 
 ## Fase 5 - Panel Admin
 
-- [ ] Layout admin yang dirancang, bukan sisipan
-- [ ] Daftar lapak menunggu verifikasi
-- [ ] Aksi setujui, tolak dengan alasan, dan nonaktifkan
-- [ ] Daftar transaksi dan pencocokan pembayaran
-- [ ] Pengelolaan kategori
+- [x] Layout admin yang dirancang, bukan sisipan
+- [x] Daftar lapak menunggu verifikasi
+- [x] Aksi setujui, tolak dengan alasan, dan nonaktifkan
+- [x] Daftar transaksi dan pencocokan pembayaran
+- [x] Pengelolaan kategori
 
 Estimasi: 3 hari.
 
