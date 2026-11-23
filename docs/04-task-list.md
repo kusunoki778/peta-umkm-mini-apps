@@ -61,17 +61,17 @@ Estimasi: 4 sampai 5 hari.
 
 ## Fase 4 - Boost dan Pembayaran
 
-- [ ] Tabel dan data paket boost
-- [ ] Endpoint pembuatan boost dan Snap token
-- [ ] Halaman pemilihan paket dan checkout
-- [ ] Integrasi Snap di klien
-- [ ] Endpoint webhook dengan verifikasi tanda tangan
-- [ ] Aktivasi boost yang idempoten
-- [ ] Marker emas dan gaya boost di daftar
-- [ ] Urutan daftar: boost lebih dulu
-- [ ] Penonaktifan otomatis saat boost berakhir
-- [ ] Riwayat boost untuk pemilik
-- [ ] Pengecekan status transaksi sebagai cadangan
+- [x] Tabel dan data paket boost
+- [x] Endpoint pembuatan boost dan Snap token
+- [x] Halaman pemilihan paket dan checkout
+- [x] Integrasi Snap di klien
+- [x] Endpoint webhook dengan verifikasi tanda tangan
+- [x] Aktivasi boost yang idempoten
+- [x] Marker emas dan gaya boost di daftar
+- [x] Urutan daftar: boost lebih dulu
+- [x] Penonaktifan otomatis saat boost berakhir
+- [x] Riwayat boost untuk pemilik
+- [x] Pengecekan status transaksi sebagai cadangan
 
 Estimasi: 4 sampai 5 hari.
 

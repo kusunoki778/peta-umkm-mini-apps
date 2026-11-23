@@ -14,8 +14,7 @@ async function get(path) {
 }
 async function json(path) {
   const r = await fetch(BASE + path)
-  let b = null
-  try { b = await r.json() } catch { b = null }
+  const b = await r.json().catch(() => null)
   return { status: r.status, body: b }
 }
 
