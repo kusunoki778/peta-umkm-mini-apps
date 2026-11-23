@@ -63,3 +63,70 @@
     outline-offset: 2px;
   }
 }
+
+/*
+  Penanda peta. Dibuat sebagai elemen sendiri, bukan memakai ikon bawaan Leaflet,
+  supaya kategori bisa dibaca sebagai warna dan boost terlihat berbeda.
+*/
+@layer components {
+  .lapak-pin-bungkus {
+    background: none;
+    border: 0;
+  }
+
+  .lapak-pin {
+    display: block;
+    border-radius: 9999px 9999px 9999px 4px;
+    transform: rotate(-45deg);
+    background-color: var(--pin-warna, var(--color-primary));
+    border: 2px solid var(--color-surface);
+    box-shadow: 0 1px 3px rgb(28 25 23 / 0.35);
+  }
+
+  /* Marker boost: emas, lebih besar, dan satu-satunya yang berdenyut. */
+  .lapak-pin-boost {
+    background-color: var(--color-accent);
+    border-color: #fff8e6;
+    animation: lapak-denyut 2.4s ease-out infinite;
+  }
+
+  .lapak-cluster-bungkus {
+    background: none;
+    border: 0;
+  }
+
+  .lapak-cluster {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    background-color: var(--color-primary);
+    color: #ffffff;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    border: 2px solid var(--color-surface);
+    box-shadow: 0 1px 3px rgb(28 25 23 / 0.3);
+  }
+}
+
+@keyframes lapak-denyut {
+  0% {
+    box-shadow: 0 0 0 0 rgb(232 163 23 / 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgb(232 163 23 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(232 163 23 / 0);
+  }
+}
+
+/* Gerakan tidak penting berhenti kalau pengguna memintanya (R-39). */
+@media (prefers-reduced-motion: reduce) {
+  .lapak-pin-boost {
+    animation: none;
+  }
+}
