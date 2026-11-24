@@ -62,7 +62,7 @@ const rupiah = (n: number) =>
   <div class="mx-auto max-w-6xl px-4 py-8">
     <header class="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <p class="text-sm text-muted">Lapak Peta</p>
+        <p class="text-sm text-muted">Ndekat</p>
         <h1 class="font-display text-3xl font-semibold">Panel admin</h1>
       </div>
       <nav class="flex gap-2" aria-label="Bagian panel admin">

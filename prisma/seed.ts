@@ -66,6 +66,7 @@ type BizSeed = {
   hours: { open: string; close: string; closedDays?: number[] }
   items: { name: string; price?: number; description?: string }[]
   boostDays?: number
+  photoUrl?: string
 }
 
 // Koordinat tersebar di sekitar kampus (radius sekitar 1 km).
@@ -86,6 +87,8 @@ const BUSINESSES: BizSeed[] = [
       { name: 'Ayam goreng', price: 12000 },
       { name: 'Es teh manis', price: 5000 },
     ],
+    photoUrl:
+      'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=960&q=80',
   },
   {
     slug: 'kos-putri-melati',
@@ -102,6 +105,8 @@ const BUSINESSES: BizSeed[] = [
       { name: 'Kamar mandi dalam', price: 1400000, description: 'Per bulan, termasuk listrik.' },
       { name: 'Kamar mandi luar', price: 900000, description: 'Per bulan, termasuk listrik.' },
     ],
+    photoUrl:
+      'https://images.unsplash.com/photo-1560185008-b033106af5c3?auto=format&fit=crop&w=960&q=80',
   },
   {
     slug: 'bengkel-jaya-motor',
@@ -119,6 +124,8 @@ const BUSINESSES: BizSeed[] = [
       { name: 'Ganti oli', price: 45000, description: 'Belum termasuk oli.' },
       { name: 'Tambal ban', price: 20000 },
     ],
+    photoUrl:
+      'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=960&q=80',
   },
   {
     slug: 'warteg-bahari',
@@ -134,6 +141,8 @@ const BUSINESSES: BizSeed[] = [
       { name: 'Nasi telur', price: 9000 },
       { name: 'Nasi ayam', price: 14000 },
     ],
+    photoUrl:
+      'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=960&q=80',
   },
   {
     slug: 'kafe-kopi-ruang',
@@ -151,6 +160,8 @@ const BUSINESSES: BizSeed[] = [
       { name: 'Americano', price: 18000 },
       { name: 'Roti bakar', price: 15000 },
     ],
+    photoUrl:
+      'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=960&q=80',
     boostDays: 30,
   },
   {
@@ -271,6 +282,19 @@ async function main() {
         closed: seed.hours.closedDays?.includes(day) ?? false,
       })),
     })
+
+    if (seed.photoUrl) {
+      const photo = await prisma.businessPhoto.findFirst({ where: { businessId: business.id } })
+      if (!photo) {
+        await prisma.businessPhoto.create({
+          data: {
+            businessId: business.id,
+            url: seed.photoUrl,
+            alt: `Foto ${seed.name}`,
+          },
+        })
+      }
+    }
 
     if (seed.boostDays && standardPackage) {
       const active = await prisma.boost.findFirst({

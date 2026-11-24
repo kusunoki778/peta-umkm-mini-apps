@@ -37,7 +37,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'id' },
-      titleTemplate: '%s | Lapak Peta',
+      titleTemplate: '%s | Ndekat',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {

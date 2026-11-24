@@ -6,7 +6,7 @@ useSeoMeta({ title: 'Halaman tidak ditemukan' })
 
 <template>
   <main class="mx-auto flex min-h-[60vh] max-w-xl flex-col justify-center px-4 py-12">
-    <p class="text-sm font-semibold text-primary">Lapak Peta</p>
+    <p class="text-sm font-semibold text-primary">Ndekat</p>
     <h1 class="mt-3 font-display text-4xl font-semibold text-ink">Halaman tidak ditemukan</h1>
     <p class="mt-3 text-muted">
       Alamat <code class="rounded bg-surface px-1">{{ route.path }}</code> tidak tersedia atau sudah

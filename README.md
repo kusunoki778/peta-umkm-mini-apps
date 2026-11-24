@@ -1,4 +1,4 @@
-# Lapak Peta
+# Ndekat
 
 Peta interaktif untuk menemukan tempat makan, kos, dan jasa di sekitar kampus. Pemilik usaha bisa mendaftarkan lapaknya, lalu membayar paket boost supaya lapaknya menonjol di peta dan muncul di atas daftar rekomendasi.
 
@@ -6,7 +6,7 @@ Status proyek: **Fase 0 sampai 5 selesai, ditambah sebagian Fase 6**. Peta inter
 
 ## Masalah yang Dipecahkan
 
-Pendatang seperti mahasiswa baru kesulitan menemukan tempat makan, kos, atau bengkel di sekitar kampus karena informasinya tersebar. Sebaliknya, pemilik usaha kecil jarang punya kanal digital sendiri. Lapak Peta menyatukan keduanya: peta untuk mencari, dan kanal sederhana untuk pemilik usaha tampil.
+Pendatang seperti mahasiswa baru kesulitan menemukan tempat makan, kos, atau bengkel di sekitar kampus karena informasinya tersebar. Sebaliknya, pemilik usaha kecil jarang punya kanal digital sendiri. Ndekat menyatukan keduanya: peta untuk mencari, dan kanal sederhana untuk pemilik usaha tampil.
 
 ## Fitur Rencana
 

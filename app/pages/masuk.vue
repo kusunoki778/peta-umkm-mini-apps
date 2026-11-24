@@ -3,7 +3,7 @@ import type { FetchError } from 'ofetch'
 
 useSeoMeta({
   title: 'Masuk',
-  description: 'Masuk ke akun Lapak Peta untuk mengelola lapak dan boost.',
+  description: 'Masuk ke akun Ndekat untuk mengelola lapak dan boost.',
 })
 
 const route = useRoute()

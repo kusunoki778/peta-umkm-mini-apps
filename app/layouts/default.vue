@@ -24,7 +24,7 @@ async function signOut() {
       class="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-border bg-surface/95 px-4 py-3 backdrop-blur-sm"
     >
       <NuxtLink to="/" class="font-display text-lg font-semibold tracking-tight">
-        Lapak Peta
+        Ndekat
       </NuxtLink>
 
       <nav class="flex items-center gap-2 text-sm" aria-label="Navigasi utama">
@@ -95,7 +95,7 @@ async function signOut() {
     </main>
 
     <footer class="border-t border-border px-4 py-6 text-sm text-muted">
-      <p>Lapak Peta, proyek portofolio direktori UMKM berbasis peta.</p>
+      <p>Ndekat, direktori UMKM berbasis peta.</p>
     </footer>
   </div>
 </template>

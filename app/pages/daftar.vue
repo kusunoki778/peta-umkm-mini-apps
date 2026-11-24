@@ -3,7 +3,7 @@ import type { FetchError } from 'ofetch'
 
 useSeoMeta({
   title: 'Buat akun',
-  description: 'Buat akun Lapak Peta untuk mendaftarkan lapak usaha dan mengajukan boost.',
+  description: 'Buat akun Ndekat untuk mendaftarkan lapak usaha dan mengajukan boost.',
 })
 
 const { fetch: refreshSession } = useUserSession()
