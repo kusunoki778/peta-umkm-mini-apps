@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const user = await requireAuth(event)
   const parsed = businessInputSchema.safeParse(await readBody(event))
   if (!parsed.success) {
@@ -6,7 +6,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const input = parsed.data
-  const category = await prisma.category.findUnique({ where: { id: input.categoryId }, select: { id: true } })
+  const category = await prisma.category.findUnique({
+    where: { id: input.categoryId },
+    select: { id: true },
+  })
   if (!category) throw fail(422, 'Kategori yang dipilih tidak ada.')
 
   const slug = await uniqueSlug(slugify(input.name))

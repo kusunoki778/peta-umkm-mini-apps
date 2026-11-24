@@ -10,18 +10,18 @@ Alasannya: hampir seluruh pekerjaan proyek ini adalah UI dan data, bukan beban k
 
 ## Tabel Keputusan
 
-| Kebutuhan | Pilihan | Alternatif | Alasan pilihan |
-|---|---|---|---|
-| Bahasa utama | TypeScript | JavaScript | Tipe mencegah bug di batas server dan klien, dan jadi nilai tambah di portofolio. |
-| Framework | Nuxt 4 | Next.js (React) | Vue dipilih pemilik; Nuxt memberi UI dan server API dalam satu proyek dan SSR untuk SEO. |
-| Gaya | Tailwind CSS | CSS Modules, UnoCSS | Cepat dan konsisten, cocok dengan token desain yang sudah ditetapkan. |
-| Basis data | PostgreSQL + PostGIS | MySQL, MongoDB | PostGIS memberi pencarian radius dan jarak yang benar. |
-| ORM | Prisma | Drizzle, SQL mentah | Mudah dibaca dan migrasi jelas; query geospasial tetap SQL mentah. |
-| Auth | nuxt-auth-utils atau sidebase/nuxt-auth | Lucia (kurang aktif) | Ringan, cocok untuk kredensial dan peran. |
-| Peta | Leaflet | Mapbox, Google Maps | Gratis, tanpa kunci API, mudah disesuaikan. |
-| Pembayaran | Midtrans Snap | Xendit | Familiar, sandbox mudah, sesuai konteks lokal. |
-| Validasi | Zod | Yup, Valibot | Skema tunggal untuk server dan klien. |
-| Uji | Vitest (unit), Playwright (end-to-end) | Jest | Cepat dan cocok dengan ekosistem Vite/Nuxt. |
+| Kebutuhan    | Pilihan                                 | Alternatif           | Alasan pilihan                                                                           |
+| ------------ | --------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------- |
+| Bahasa utama | TypeScript                              | JavaScript           | Tipe mencegah bug di batas server dan klien, dan jadi nilai tambah di portofolio.        |
+| Framework    | Nuxt 4                                  | Next.js (React)      | Vue dipilih pemilik; Nuxt memberi UI dan server API dalam satu proyek dan SSR untuk SEO. |
+| Gaya         | Tailwind CSS                            | CSS Modules, UnoCSS  | Cepat dan konsisten, cocok dengan token desain yang sudah ditetapkan.                    |
+| Basis data   | PostgreSQL + PostGIS                    | MySQL, MongoDB       | PostGIS memberi pencarian radius dan jarak yang benar.                                   |
+| ORM          | Prisma                                  | Drizzle, SQL mentah  | Mudah dibaca dan migrasi jelas; query geospasial tetap SQL mentah.                       |
+| Auth         | nuxt-auth-utils atau sidebase/nuxt-auth | Lucia (kurang aktif) | Ringan, cocok untuk kredensial dan peran.                                                |
+| Peta         | Leaflet                                 | Mapbox, Google Maps  | Gratis, tanpa kunci API, mudah disesuaikan.                                              |
+| Pembayaran   | Midtrans Snap                           | Xendit               | Familiar, sandbox mudah, sesuai konteks lokal.                                           |
+| Validasi     | Zod                                     | Yup, Valibot         | Skema tunggal untuk server dan klien.                                                    |
+| Uji          | Vitest (unit), Playwright (end-to-end)  | Jest                 | Cepat dan cocok dengan ekosistem Vite/Nuxt.                                              |
 
 ## Kenapa Bukan Go untuk Proyek Ini
 

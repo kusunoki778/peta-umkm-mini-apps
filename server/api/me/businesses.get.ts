@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const user = await requireAuth(event)
 
   const businesses = await prisma.business.findMany({
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  return businesses.map((business) => {
+  return businesses.map(business => {
     const boost = business.boosts[0] ?? null
     return {
       id: business.id,

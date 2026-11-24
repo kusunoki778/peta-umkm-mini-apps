@@ -33,12 +33,13 @@ const errorMessage = ref('')
 const submitting = ref(false)
 const searchingLocation = ref(false)
 
-const canSubmit = computed(() =>
-  form.name.trim().length >= 2
-  && form.categoryId !== ''
-  && form.address.trim().length >= 5
-  && form.latitude !== ''
-  && form.longitude !== '',
+const canSubmit = computed(
+  () =>
+    form.name.trim().length >= 2 &&
+    form.categoryId !== '' &&
+    form.address.trim().length >= 5 &&
+    form.latitude !== '' &&
+    form.longitude !== '',
 )
 
 function useCurrentLocation() {
@@ -48,12 +49,13 @@ function useCurrentLocation() {
     return
   }
   navigator.geolocation.getCurrentPosition(
-    (position) => {
+    position => {
       form.latitude = position.coords.latitude.toFixed(6)
       form.longitude = position.coords.longitude.toFixed(6)
     },
     () => {
-      errorMessage.value = 'Izin lokasi ditolak. Isi koordinat manual, atau geser peta di halaman detail nanti.'
+      errorMessage.value =
+        'Izin lokasi ditolak. Isi koordinat manual, atau geser peta di halaman detail nanti.'
     },
     { enableHighAccuracy: true, timeout: 10000 },
   )
@@ -68,10 +70,13 @@ async function searchLocation() {
   searchingLocation.value = true
   errorMessage.value = ''
   try {
-    const results = await $fetch<{ lat: string, lon: string, display_name: string }[]>('https://nominatim.openstreetmap.org/search', {
-      query: { q: query, format: 'jsonv2', limit: 1, 'accept-language': 'id' },
-      headers: { Accept: 'application/json' },
-    })
+    const results = await $fetch<{ lat: string; lon: string; display_name: string }[]>(
+      'https://nominatim.openstreetmap.org/search',
+      {
+        query: { q: query, format: 'jsonv2', limit: 1, 'accept-language': 'id' },
+        headers: { Accept: 'application/json' },
+      },
+    )
     const result = results[0]
     if (!result) {
       errorMessage.value = 'Lokasi tidak ditemukan. Coba tambah kota atau negara.'
@@ -105,12 +110,10 @@ async function submit() {
       },
     })
     await navigateTo(`/kelola/${created.slug}`)
-  }
-  catch (error) {
+  } catch (error) {
     const failure = error as FetchError<{ message?: string }>
     errorMessage.value = failure.data?.message ?? 'Lapak gagal disimpan. Coba lagi.'
-  }
-  finally {
+  } finally {
     submitting.value = false
   }
 }
@@ -124,7 +127,8 @@ async function submit() {
 
     <h1 class="mt-3 font-display text-2xl font-semibold text-ink">Tambah lapak</h1>
     <p class="mt-2 text-muted">
-      Lapak akan ditinjau admin dulu sebelum muncul di peta. Kamu tetap bisa mengisi menu dan jam buka sekarang.
+      Lapak akan ditinjau admin dulu sebelum muncul di peta. Kamu tetap bisa mengisi menu dan jam
+      buka sekarang.
     </p>
 
     <form class="mt-8 space-y-5" novalidate @submit.prevent="submit">
@@ -167,21 +171,21 @@ async function submit() {
         />
       </div>
 
-        <AppField
-          id="lapak-alamat"
+      <AppField
+        id="lapak-alamat"
         v-model="form.address"
         label="Alamat"
         required
         hint="Tulis patokan yang mudah dicari, misalnya nama gang atau bangunan terdekat."
-        />
-        <button
-          type="button"
-          class="min-h-11 rounded-lg border border-primary px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="searchingLocation"
-          @click="searchLocation"
-        >
-          {{ searchingLocation ? 'Mencari lokasi...' : 'Cari lokasi di peta' }}
-        </button>
+      />
+      <button
+        type="button"
+        class="min-h-11 rounded-lg border border-primary px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+        :disabled="searchingLocation"
+        @click="searchLocation"
+      >
+        {{ searchingLocation ? 'Mencari lokasi...' : 'Cari lokasi di peta' }}
+      </button>
 
       <div class="grid gap-5 sm:grid-cols-2">
         <AppField id="lapak-telepon" v-model="form.phone" label="Telepon" type="tel" />
@@ -199,10 +203,19 @@ async function submit() {
             :latitude="form.latitude === '' ? null : Number(form.latitude)"
             :longitude="form.longitude === '' ? null : Number(form.longitude)"
             class="mt-3"
-            @pilih="(latitude, longitude) => { form.latitude = String(latitude); form.longitude = String(longitude) }"
+            @pilih="
+              (latitude, longitude) => {
+                form.latitude = String(latitude)
+                form.longitude = String(longitude)
+              }
+            "
           />
           <template #fallback>
-            <div class="mt-3 flex h-64 items-center justify-center rounded-lg border border-border bg-surface text-sm text-muted">Memuat peta pemilih titik...</div>
+            <div
+              class="mt-3 flex h-64 items-center justify-center rounded-lg border border-border bg-surface text-sm text-muted"
+            >
+              Memuat peta pemilih titik...
+            </div>
           </template>
         </ClientOnly>
 
@@ -213,7 +226,7 @@ async function submit() {
             label="Lintang (latitude)"
             type="number"
             required
-             hint="Terisi dari klik peta, masih bisa diedit."
+            hint="Terisi dari klik peta, masih bisa diedit."
           />
           <AppField
             id="lapak-bujur"
@@ -221,7 +234,7 @@ async function submit() {
             label="Bujur (longitude)"
             type="number"
             required
-             hint="Terisi dari klik peta, masih bisa diedit."
+            hint="Terisi dari klik peta, masih bisa diedit."
           />
         </div>
 

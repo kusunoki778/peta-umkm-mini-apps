@@ -4,7 +4,7 @@ const bodySchema = z.object({
   hours: z.array(hourInputSchema).max(7, 'Maksimal 7 baris jam buka.'),
 })
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const user = await requireAuth(event)
   const key = getRouterParam(event, 'key')
   if (!key) throw fail(400, 'Lapak tidak ada.')

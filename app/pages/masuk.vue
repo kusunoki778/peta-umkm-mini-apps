@@ -21,12 +21,10 @@ async function submit() {
     await refreshSession()
     const next = typeof route.query.lanjut === 'string' ? route.query.lanjut : '/kelola'
     await navigateTo(next)
-  }
-  catch (error) {
+  } catch (error) {
     const failure = error as FetchError<{ message?: string }>
     errorMessage.value = failure.data?.message ?? 'Tidak bisa masuk sekarang. Coba lagi.'
-  }
-  finally {
+  } finally {
     submitting.value = false
   }
 }
@@ -35,9 +33,7 @@ async function submit() {
 <template>
   <div class="mx-auto max-w-md px-4 py-12">
     <h1 class="font-display text-2xl font-semibold text-ink">Masuk ke akunmu</h1>
-    <p class="mt-2 text-muted">
-      Kelola data lapak dan pantau status boost dari satu tempat.
-    </p>
+    <p class="mt-2 text-muted">Kelola data lapak dan pantau status boost dari satu tempat.</p>
 
     <form class="mt-8 space-y-5" novalidate @submit.prevent="submit">
       <p

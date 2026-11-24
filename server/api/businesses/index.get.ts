@@ -26,7 +26,7 @@ type Row = {
   photo_url: string | null
 }
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const parsed = querySchema.safeParse(getQuery(event))
   if (!parsed.success) {
     throw fail(422, parsed.error.issues[0]?.message ?? 'Parameter pencarian tidak valid.')
@@ -40,10 +40,7 @@ export default defineEventHandler(async (event) => {
   // Satu query: boost aktif lebih dulu, lalu jarak kalau titik asal dikirim,
   // lalu nama. Jarak memakai earth_distance (ekstensi earthdistance) dan
   // filter radius memakai earth_box yang terindeks GiST.
-  const filters: Prisma.Sql[] = [
-    Prisma.sql`b.status = 'live'`,
-    Prisma.sql`b.deleted_at IS NULL`,
-  ]
+  const filters: Prisma.Sql[] = [Prisma.sql`b.status = 'live'`, Prisma.sql`b.deleted_at IS NULL`]
 
   if (q) {
     filters.push(Prisma.sql`(b.name ILIKE ${`%${q}%`} OR b.description ILIKE ${`%${q}%`})`)

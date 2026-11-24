@@ -3,9 +3,12 @@ import { prisma } from '../../../utils/prisma'
 import { requireAdmin } from '../../../utils/auth'
 import { fail } from '../../../utils/errors'
 
-const input = z.object({ status: z.enum(['live', 'rejected', 'inactive']), reason: z.string().trim().max(500).nullable().optional() })
+const input = z.object({
+  status: z.enum(['live', 'rejected', 'inactive']),
+  reason: z.string().trim().max(500).nullable().optional(),
+})
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   await requireAdmin(event)
   const id = getRouterParam(event, 'id')
   const parsed = input.safeParse(await readBody(event))
@@ -14,6 +17,9 @@ export default defineEventHandler(async (event) => {
   if (!business) return fail(404, 'Lapak tidak ditemukan.')
   return prisma.business.update({
     where: { id },
-    data: { status: parsed.data.status, rejectionReason: parsed.data.status === 'rejected' ? parsed.data.reason ?? null : null },
+    data: {
+      status: parsed.data.status,
+      rejectionReason: parsed.data.status === 'rejected' ? (parsed.data.reason ?? null) : null,
+    },
   })
 })

@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const user = await requireAuth(event)
   const key = getRouterParam(event, 'key')
   if (!key) throw fail(400, 'Lapak tidak ada.')

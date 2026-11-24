@@ -14,11 +14,11 @@ Karakter yang dituju: hangat dan dekat, seperti papan nama warung dan label harg
 
 ## Tiga Dial
 
-| Dial | Nilai | Alasan |
-|---|---|---|
-| ENERGY | 2 (balanced) | Produk publik untuk orang awam, bukan brand agresif. Cukup hidup lewat warna kategori dan marker, tidak berteriak. |
-| RHYTHM | 2 (konsisten dengan sedikit variasi) | Halaman utama selalu peta. Variasi muncul di halaman detail, dashboard pemilik, dan panel admin yang berbentuk form dan tabel. |
-| MOTION | 2 (transisi, scroll-reveal seperlunya) | Satu gerakan sengaja: halo berdenyut di marker boost. Sisanya tenang. |
+| Dial   | Nilai                                  | Alasan                                                                                                                         |
+| ------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| ENERGY | 2 (balanced)                           | Produk publik untuk orang awam, bukan brand agresif. Cukup hidup lewat warna kategori dan marker, tidak berteriak.             |
+| RHYTHM | 2 (konsisten dengan sedikit variasi)   | Halaman utama selalu peta. Variasi muncul di halaman detail, dashboard pemilik, dan panel admin yang berbentuk form dan tabel. |
+| MOTION | 2 (transisi, scroll-reveal seperlunya) | Satu gerakan sengaja: halo berdenyut di marker boost. Sisanya tenang.                                                          |
 
 ## Nama Produk
 
@@ -30,14 +30,14 @@ Status: **belum final**. Wordmark sementara memakai teks "Lapak Peta" dalam tipo
 
 Referensi dipakai untuk belajar **pola interaksi**, bukan untuk meniru tampilan produk lain.
 
-| Referensi | Yang dipelajari |
-|---|---|
-| Google Maps | Hubungan peta dan panel daftar, penempatan kontrol zoom dan lokasi saya, kebiasaan pengguna pada peta. |
-| Airbnb | Pola peta di kiri dan kartu di kanan, serta cara kartu dan pin saling menyorot saat disorot. |
-| GoFood / GrabFood | Kartu merchant, ikon kategori, susunan daftar rekomendasi. |
-| Foursquare | Taksonomi kategori tempat. |
-| HappyCow | Peta plus daftar untuk tempat lokal. |
-| Signage warung, spanduk pasar, label harga Indonesia | Warna berani, tipografi papan nama, bentuk label harga menjadi sumber motif identitas. |
+| Referensi                                            | Yang dipelajari                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Google Maps                                          | Hubungan peta dan panel daftar, penempatan kontrol zoom dan lokasi saya, kebiasaan pengguna pada peta. |
+| Airbnb                                               | Pola peta di kiri dan kartu di kanan, serta cara kartu dan pin saling menyorot saat disorot.           |
+| GoFood / GrabFood                                    | Kartu merchant, ikon kategori, susunan daftar rekomendasi.                                             |
+| Foursquare                                           | Taksonomi kategori tempat.                                                                             |
+| HappyCow                                             | Peta plus daftar untuk tempat lokal.                                                                   |
+| Signage warung, spanduk pasar, label harga Indonesia | Warna berani, tipografi papan nama, bentuk label harga menjadi sumber motif identitas.                 |
 
 ## Identitas
 
@@ -55,39 +55,39 @@ Prinsip: 2 warna inti (hijau daun dan netral kertas) + 1 aksen (emas untuk boost
 
 ### Netral
 
-| Token | Hex (light) | Hex (dark) | Pemakaian | Alasan |
-|---|---|---|---|---|
-| `--paper` | `#F7F4EF` | `#15130F` | Latar halaman | Putih hangat seperti kertas, bukan putih dingin steri. |
-| `--surface` | `#FFFFFF` | `#1F1C17` | Kartu, panel | Memisahkan kartu dari latar tanpa bayangan besar. |
-| `--ink` | `#1C1917` | `#F5F2EC` | Teks utama | Hitam hangat, kontras tinggi terhadap paper. |
-| `--muted` | `#6B6459` | `#A8A093` | Teks sekunder | Abu kecokelatan, senada dengan netral hangat. |
-| `--border` | `#E4DED4` | `#332E26` | Garis tepi | Pemisah halus, bukan garis tebal abu. |
+| Token       | Hex (light) | Hex (dark) | Pemakaian     | Alasan                                                 |
+| ----------- | ----------- | ---------- | ------------- | ------------------------------------------------------ |
+| `--paper`   | `#F7F4EF`   | `#15130F`  | Latar halaman | Putih hangat seperti kertas, bukan putih dingin steri. |
+| `--surface` | `#FFFFFF`   | `#1F1C17`  | Kartu, panel  | Memisahkan kartu dari latar tanpa bayangan besar.      |
+| `--ink`     | `#1C1917`   | `#F5F2EC`  | Teks utama    | Hitam hangat, kontras tinggi terhadap paper.           |
+| `--muted`   | `#6B6459`   | `#A8A093`  | Teks sekunder | Abu kecokelatan, senada dengan netral hangat.          |
+| `--border`  | `#E4DED4`   | `#332E26`  | Garis tepi    | Pemisah halus, bukan garis tebal abu.                  |
 
 ### Inti dan aksen
 
-| Token | Hex | Pemakaian | Alasan |
-|---|---|---|---|
-| `--primary` | `#0F6B4F` | Aksi utama, tombol, tautan aktif, marker default | Hijau daun terasa lokal dan tenang, bukan biru korporat yang jadi default AI. |
-| `--accent` | `#E8A317` | Boost, badge Lapak Unggulan, marker emas | Emas secara alami terbaca sebagai "premium", jadi status berbayar tidak perlu dijelaskan. |
-| `--danger` | `#C2412D` | Hapus, error | Merah bata hangat supaya senada, bukan merah terang. |
+| Token       | Hex       | Pemakaian                                        | Alasan                                                                                    |
+| ----------- | --------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `--primary` | `#0F6B4F` | Aksi utama, tombol, tautan aktif, marker default | Hijau daun terasa lokal dan tenang, bukan biru korporat yang jadi default AI.             |
+| `--accent`  | `#E8A317` | Boost, badge Lapak Unggulan, marker emas         | Emas secara alami terbaca sebagai "premium", jadi status berbayar tidak perlu dijelaskan. |
+| `--danger`  | `#C2412D` | Hapus, error                                     | Merah bata hangat supaya senada, bukan merah terang.                                      |
 
 ### Warna kategori (encoding)
 
-| Kategori | Hex | Alasan |
-|---|---|---|
-| Kuliner | `#E4572E` | Hangat dan menggugah, paling banyak isinya. |
-| Kos | `#2E6BB0` | Biru tenang, membedakan jelas dari kategori lain. |
-| Bengkel | `#5A6472` | Abu baja, mengikuti nuansa alat dan logam. |
+| Kategori  | Hex       | Alasan                                                |
+| --------- | --------- | ----------------------------------------------------- |
+| Kuliner   | `#E4572E` | Hangat dan menggugah, paling banyak isinya.           |
+| Kos       | `#2E6BB0` | Biru tenang, membedakan jelas dari kategori lain.     |
+| Bengkel   | `#5A6472` | Abu baja, mengikuti nuansa alat dan logam.            |
 | Jasa lain | `#7A4FB5` | Ungu, kategori sisa yang tetap butuh penanda sendiri. |
 
 Catatan: setiap pasangan teks dan latar wajib dicek kontrasnya (target WCAG AA: 4.5:1 untuk teks normal, 3:1 untuk teks besar) sebelum dipakai. Warna teks di atas pin dan chip harus diuji, jangan diasumsikan.
 
 ## Tipografi
 
-| Peran | Typeface | Alasan |
-|---|---|---|
+| Peran                    | Typeface                      | Alasan                                                                                                                                                                                            |
+| ------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Heading, brand, headline | **Fraunces** (serif variabel) | Karakter cetak dan papan nama, memberi kehangatan UMKM, dan sengaja menghindari pasangan sans default (Inter/Geist/Space Grotesk). Dipakai hemat: judul brand, judul seksi, headline empty state. |
-| Body, UI, label peta | **Plus Jakarta Sans** | Typeface buatan Indonesia, humanis, legibility tinggi untuk UI padat seperti daftar dan chip peta. |
+| Body, UI, label peta     | **Plus Jakarta Sans**         | Typeface buatan Indonesia, humanis, legibility tinggi untuk UI padat seperti daftar dan chip peta.                                                                                                |
 
 Skala tipe: `display` 32/40, `h1` 24/32, `h2` 20/28, `body` 15/24, `label` 13/18, `caption` 12/16. Beban heading 600, body 400 sampai 500, angka harga memakai angka tabular.
 
@@ -95,15 +95,15 @@ Skala tipe: `display` 32/40, `h1` 24/32, `h2` 20/28, `body` 15/24, `label` 13/18
 
 Ikon dipilih karena relevansi isi, bukan karena setnya populer. Gaya: garis tebal 2px dengan ujung membulat, konsisten satu keluarga.
 
-| Konteks | Ikon |
-|---|---|
-| Kuliner | sendok dan garpu |
-| Kos | kasur |
-| Bengkel | kunci inggris |
-| Jasa lain | kotak alat |
-| Lokasi saya | bidik |
-| Rute | arah belok |
-| Boost | label harga dengan bintang |
+| Konteks     | Ikon                       |
+| ----------- | -------------------------- |
+| Kuliner     | sendok dan garpu           |
+| Kos         | kasur                      |
+| Bengkel     | kunci inggris              |
+| Jasa lain   | kotak alat                 |
+| Lokasi saya | bidik                      |
+| Rute        | arah belok                 |
+| Boost       | label harga dengan bintang |
 
 Alasan tiap ikon harus jelas dalam satu baris saat dipakai. Kalau tidak ada ikon yang relevan, label teks lebih baik daripada ikon dekoratif.
 
@@ -175,13 +175,13 @@ SearchBar, FilterChip, CategoryLegend, MapCanvas, MapMarker, MerchantCard, Merch
 
 Setiap tampilan data wajib punya tiga keadaan (R-27).
 
-| Keadaan | Tampilan | Contoh teks |
-|---|---|---|
-| Loading | Skeleton 4 kartu, peta menampilkan indikator memuat | "Memuat lapak di sekitarmu" |
-| Empty (belum ada data) | Ilustrasi sederhana dari bentuk label papan lapak, satu ajakan | "Belum ada lapak di area ini. Jadi yang pertama mendaftar." dengan tombol "Daftarkan Lapak" |
-| Empty (hasil filter kosong) | Sama tapi aksi berbeda | "Tidak ada lapak untuk filter ini. Coba hapus filter." dengan tombol "Hapus filter" |
-| Error | Pesan spesifik dan aksi coba lagi | "Gagal memuat peta. Periksa koneksi lalu coba lagi." |
-| Geolocation ditolak | Penjelasan, bukan error menakutkan | "Izin lokasi dimatikan. Kamu tetap bisa jelajah peta manual." |
+| Keadaan                     | Tampilan                                                       | Contoh teks                                                                                 |
+| --------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Loading                     | Skeleton 4 kartu, peta menampilkan indikator memuat            | "Memuat lapak di sekitarmu"                                                                 |
+| Empty (belum ada data)      | Ilustrasi sederhana dari bentuk label papan lapak, satu ajakan | "Belum ada lapak di area ini. Jadi yang pertama mendaftar." dengan tombol "Daftarkan Lapak" |
+| Empty (hasil filter kosong) | Sama tapi aksi berbeda                                         | "Tidak ada lapak untuk filter ini. Coba hapus filter." dengan tombol "Hapus filter"         |
+| Error                       | Pesan spesifik dan aksi coba lagi                              | "Gagal memuat peta. Periksa koneksi lalu coba lagi."                                        |
+| Geolocation ditolak         | Penjelasan, bukan error menakutkan                             | "Izin lokasi dimatikan. Kamu tetap bisa jelajah peta manual."                               |
 
 Kalimatnya harus menyebutkan sebab dan aksi berikutnya, bukan sekadar "No data".
 
@@ -191,11 +191,11 @@ Bahasa Indonesia, santai tapi rapi. Kalimat pendek. Tidak ada klaim tanpa bukti.
 
 Tombol memakai kata kerja yang spesifik:
 
-| Perlu dihindari | Dipakai |
-|---|---|
-| Get Started | Daftarkan Lapak |
-| Learn More | Lihat menu dan jam buka |
-| Try Now | Coba peta |
+| Perlu dihindari | Dipakai                    |
+| --------------- | -------------------------- |
+| Get Started     | Daftarkan Lapak            |
+| Learn More      | Lihat menu dan jam buka    |
+| Try Now         | Coba peta                  |
 | Boost / Upgrade | Boost Lapak Ini (Rp25.000) |
 
 Contoh teks lain: toast sukses "Lapak kamu sudah tayang di peta."; toast boost aktif "Boost aktif selama 30 hari. Markermu kini disorot."; error form "Foto terlalu besar, maksimal 2 MB."

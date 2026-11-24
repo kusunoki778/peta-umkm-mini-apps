@@ -29,10 +29,18 @@ export async function uniqueSlug(base: string, exceptId?: string) {
 }
 
 export const businessInputSchema = z.object({
-  name: z.string().trim().min(2, 'Nama lapak minimal 2 karakter.').max(80, 'Nama lapak maksimal 80 karakter.'),
+  name: z
+    .string()
+    .trim()
+    .min(2, 'Nama lapak minimal 2 karakter.')
+    .max(80, 'Nama lapak maksimal 80 karakter.'),
   categoryId: z.coerce.number().int().positive('Pilih kategori lapak.'),
   description: z.string().trim().max(600, 'Deskripsi maksimal 600 karakter.').optional(),
-  address: z.string().trim().min(5, 'Alamat minimal 5 karakter.').max(200, 'Alamat maksimal 200 karakter.'),
+  address: z
+    .string()
+    .trim()
+    .min(5, 'Alamat minimal 5 karakter.')
+    .max(200, 'Alamat maksimal 200 karakter.'),
   phone: z.string().trim().max(20, 'Nomor telepon maksimal 20 karakter.').optional(),
   whatsapp: z.string().trim().max(20, 'Nomor WhatsApp maksimal 20 karakter.').optional(),
   latitude: z.coerce.number().min(-90, 'Lintang tidak valid.').max(90, 'Lintang tidak valid.'),
@@ -40,9 +48,18 @@ export const businessInputSchema = z.object({
 })
 
 export const itemInputSchema = z.object({
-  name: z.string().trim().min(1, 'Nama item wajib diisi.').max(80, 'Nama item maksimal 80 karakter.'),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Nama item wajib diisi.')
+    .max(80, 'Nama item maksimal 80 karakter.'),
   price: z.coerce.number().int().min(0, 'Harga tidak boleh negatif.').optional().nullable(),
-  description: z.string().trim().max(200, 'Keterangan maksimal 200 karakter.').optional().nullable(),
+  description: z
+    .string()
+    .trim()
+    .max(200, 'Keterangan maksimal 200 karakter.')
+    .optional()
+    .nullable(),
 })
 
 export const hourInputSchema = z.object({

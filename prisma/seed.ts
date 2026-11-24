@@ -25,9 +25,32 @@ const CATEGORIES = [
 ]
 
 const PACKAGES = [
-  { name: 'Hemat', durationDays: 7, price: 15000, sort: 1, features: ['Penanda emas di peta', 'Naik ke atas daftar terdekat'] },
-  { name: 'Standar', durationDays: 30, price: 25000, sort: 2, features: ['Penanda emas di peta', 'Naik ke atas daftar terdekat', 'Tampil di sorotan beranda'] },
-  { name: 'Pro', durationDays: 90, price: 60000, sort: 3, features: ['Penanda emas di peta', 'Naik ke atas daftar terdekat', 'Tampil di sorotan beranda', 'Riwayat tayang 90 hari'] },
+  {
+    name: 'Hemat',
+    durationDays: 7,
+    price: 15000,
+    sort: 1,
+    features: ['Penanda emas di peta', 'Naik ke atas daftar terdekat'],
+  },
+  {
+    name: 'Standar',
+    durationDays: 30,
+    price: 25000,
+    sort: 2,
+    features: ['Penanda emas di peta', 'Naik ke atas daftar terdekat', 'Tampil di sorotan beranda'],
+  },
+  {
+    name: 'Pro',
+    durationDays: 90,
+    price: 60000,
+    sort: 3,
+    features: [
+      'Penanda emas di peta',
+      'Naik ke atas daftar terdekat',
+      'Tampil di sorotan beranda',
+      'Riwayat tayang 90 hari',
+    ],
+  },
 ]
 
 type BizSeed = {
@@ -167,7 +190,12 @@ async function main() {
   for (const category of CATEGORIES) {
     await prisma.category.upsert({
       where: { slug: category.slug },
-      update: { name: category.name, color: category.color, icon: category.icon, sort: category.sort },
+      update: {
+        name: category.name,
+        color: category.color,
+        icon: category.icon,
+        sort: category.sort,
+      },
       create: category,
     })
   }
@@ -176,14 +204,17 @@ async function main() {
     const existing = await prisma.boostPackage.findFirst({ where: { name: pack.name } })
     if (existing) {
       await prisma.boostPackage.update({ where: { id: existing.id }, data: pack })
-    }
-    else {
+    } else {
       await prisma.boostPackage.create({ data: pack })
     }
   }
 
   await upsertUser({ email: 'admin@lapakpeta.test', name: 'Admin Lapak Peta', role: 'admin' })
-  const owner = await upsertUser({ email: 'pemilik@lapakpeta.test', name: 'Pemilik Contoh', role: 'owner' })
+  const owner = await upsertUser({
+    email: 'pemilik@lapakpeta.test',
+    name: 'Pemilik Contoh',
+    role: 'owner',
+  })
 
   const categories = await prisma.category.findMany()
   const categoryBySlug = new Map(categories.map(c => [c.slug, c.id]))
@@ -278,7 +309,7 @@ async function main() {
 
 main()
   .then(() => prisma.$disconnect())
-  .catch(async (error) => {
+  .catch(async error => {
     console.error(error)
     await prisma.$disconnect()
     process.exitCode = 1

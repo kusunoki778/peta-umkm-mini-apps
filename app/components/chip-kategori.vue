@@ -13,9 +13,11 @@ defineEmits<{ klik: [] }>()
   <button
     type="button"
     class="inline-flex min-h-11 items-center gap-2 rounded-tag border px-3 text-sm transition-colors"
-    :class="aktif
-      ? 'border-ink bg-ink text-paper'
-      : 'border-border bg-surface text-ink hover:border-muted'"
+    :class="
+      aktif
+        ? 'border-ink bg-ink text-paper'
+        : 'border-border bg-surface text-ink hover:border-muted'
+    "
     :aria-pressed="aktif ? 'true' : 'false'"
     @click="$emit('klik')"
   >

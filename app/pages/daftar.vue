@@ -19,12 +19,10 @@ async function submit() {
     await $fetch('/api/auth/register', { method: 'POST', body: form })
     await refreshSession()
     await navigateTo('/kelola')
-  }
-  catch (error) {
+  } catch (error) {
     const failure = error as FetchError<{ message?: string }>
     errorMessage.value = failure.data?.message ?? 'Pendaftaran gagal. Coba lagi.'
-  }
-  finally {
+  } finally {
     submitting.value = false
   }
 }
@@ -46,13 +44,7 @@ async function submit() {
         {{ errorMessage }}
       </p>
 
-      <AppField
-        id="daftar-nama"
-        v-model="form.name"
-        label="Nama"
-        autocomplete="name"
-        required
-      />
+      <AppField id="daftar-nama" v-model="form.name" label="Nama" autocomplete="name" required />
       <AppField
         id="daftar-email"
         v-model="form.email"

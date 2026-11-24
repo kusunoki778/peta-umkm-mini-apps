@@ -1,8 +1,18 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' })
 
-interface Paket { id: number, name: string, durationDays: number, price: number, features: string[] | null }
-interface Lapak { id: string, name: string, slug: string }
+interface Paket {
+  id: number
+  name: string
+  durationDays: number
+  price: number
+  features: string[] | null
+}
+interface Lapak {
+  id: string
+  name: string
+  slug: string
+}
 interface Konfigurasi {
   serverKeySet: boolean
   clientKeySet: boolean
@@ -32,12 +42,17 @@ let snapSiap: Promise<boolean> | null = null
 const konfigurasi = ref<Konfigurasi | null>(null)
 
 const rupiah = (nilai: number) =>
-  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(nilai)
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+  }).format(nilai)
 
 function pesanError(error: unknown, fallback: string) {
   if (error && typeof error === 'object' && 'data' in error) {
     const data = error.data
-    if (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') return data.message
+    if (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string')
+      return data.message
   }
   return error instanceof Error ? error.message : fallback
 }
@@ -45,7 +60,7 @@ function pesanError(error: unknown, fallback: string) {
 function muatSnap(url: string, clientKey: string) {
   const win = window as SnapWindow
   if (win.snap) return Promise.resolve(true)
-  return new Promise<boolean>((resolve) => {
+  return new Promise<boolean>(resolve => {
     const existing = document.querySelector<HTMLScriptElement>('script[data-snapjs]')
     const script = existing ?? document.createElement('script')
     script.addEventListener('load', () => resolve(Boolean(win.snap)))
@@ -96,7 +111,7 @@ async function bayar() {
 
   sedangBayar.value = true
   try {
-    const result = await $fetch<{ orderId: string, snapToken: string }>('/api/boosts', {
+    const result = await $fetch<{ orderId: string; snapToken: string }>('/api/boosts', {
       method: 'POST',
       body: { businessId: lapak.value.id, packageId: dipilih.value },
     })
@@ -104,15 +119,24 @@ async function bayar() {
     const siap = await (snapSiap ?? Promise.resolve(false))
     const win = window as SnapWindow
     if (!siap || !win.snap) {
-      gagal.value = 'Jendela pembayaran Midtrans gagal dimuat. Periksa koneksi lalu muat ulang halaman.'
+      gagal.value =
+        'Jendela pembayaran Midtrans gagal dimuat. Periksa koneksi lalu muat ulang halaman.'
       return
     }
 
     win.snap.pay(result.snapToken, {
-      onSuccess: () => { pesan.value = 'Pembayaran diterima. Boost aktif setelah Midtrans mengonfirmasi transaksi.' },
-      onPending: () => { pesan.value = 'Pembayaran menunggu konfirmasi.' },
-      onError: () => { gagal.value = 'Pembayaran gagal. Coba lagi.' },
-      onClose: () => { pesan.value = 'Jendela pembayaran ditutup.' },
+      onSuccess: () => {
+        pesan.value = 'Pembayaran diterima. Boost aktif setelah Midtrans mengonfirmasi transaksi.'
+      },
+      onPending: () => {
+        pesan.value = 'Pembayaran menunggu konfirmasi.'
+      },
+      onError: () => {
+        gagal.value = 'Pembayaran gagal. Coba lagi.'
+      },
+      onClose: () => {
+        pesan.value = 'Jendela pembayaran ditutup.'
+      },
     })
   } catch (error: unknown) {
     gagal.value = pesanError(error, 'Checkout gagal dibuat.')
@@ -123,35 +147,59 @@ async function bayar() {
 
 onMounted(() => {
   if (konfigurasi.value?.clientKeySet) {
-    snapSiap = muatSnap(konfigurasi.value.snapScriptUrl, String(useRuntimeConfig().public.midtransClientKey ?? ''))
+    snapSiap = muatSnap(
+      konfigurasi.value.snapScriptUrl,
+      String(useRuntimeConfig().public.midtransClientKey ?? ''),
+    )
   }
 })
 </script>
 
 <template>
   <div class="mx-auto max-w-3xl px-4 py-8">
-    <NuxtLink :to="`/kelola/${slug}`" class="text-sm text-primary hover:underline">Kembali ke kelola lapak</NuxtLink>
+    <NuxtLink :to="`/kelola/${slug}`" class="text-sm text-primary hover:underline"
+      >Kembali ke kelola lapak</NuxtLink
+    >
     <h1 class="mt-3 font-display text-3xl font-semibold">Boost {{ lapak?.name ?? 'lapakmu' }}</h1>
     <p class="mt-2 text-muted">Pilih durasi sorotan. Pembayaran diproses Midtrans.</p>
 
     <div v-if="memuat" class="mt-8 space-y-3" aria-busy="true">
       <div v-for="i in 3" :key="i" class="h-24 animate-pulse rounded-tag bg-surface" />
     </div>
-    <div v-else-if="gagal && !paket.length" class="mt-8 rounded-tag border border-danger/40 bg-surface p-5 text-danger" role="alert">{{ gagal }}</div>
+    <div
+      v-else-if="gagal && !paket.length"
+      class="mt-8 rounded-tag border border-danger/40 bg-surface p-5 text-danger"
+      role="alert"
+    >
+      {{ gagal }}
+    </div>
     <div v-else class="mt-8 space-y-4">
       <p
         v-if="konfigurasi && (!konfigurasi.serverKeySet || !konfigurasi.clientKeySet)"
         class="rounded-tag border border-danger/40 bg-surface p-4 text-sm text-danger"
         role="alert"
       >
-        Pembayaran belum bisa diproses karena kunci Midtrans belum lengkap di server
-        ({{ konfigurasi.serverKeySet ? '' : 'server key kosong' }}{{ !konfigurasi.serverKeySet && !konfigurasi.clientKeySet ? ', ' : '' }}{{ konfigurasi.clientKeySet ? '' : 'client key kosong' }}).
-        Hubungi pengelola aplikasi.
+        Pembayaran belum bisa diproses karena kunci Midtrans belum lengkap di server ({{
+          konfigurasi.serverKeySet ? '' : 'server key kosong'
+        }}{{ !konfigurasi.serverKeySet && !konfigurasi.clientKeySet ? ', ' : ''
+        }}{{ konfigurasi.clientKeySet ? '' : 'client key kosong' }}). Hubungi pengelola aplikasi.
       </p>
-      <label v-for="item in paket" :key="item.id" class="block cursor-pointer rounded-tag border p-4 transition hover:border-primary" :class="dipilih === item.id ? 'border-primary bg-primary/5' : 'border-border bg-surface'">
-        <input v-model="dipilih" type="radio" name="paket" :value="item.id" class="sr-only">
-        <span class="flex items-center justify-between gap-4"><span><strong>{{ item.name }}</strong><span class="ml-2 text-sm text-muted">{{ item.durationDays }} hari</span></span><strong class="text-primary">{{ rupiah(item.price) }}</strong></span>
-        <span v-if="item.features?.length" class="mt-2 block text-sm text-muted">{{ item.features.join(', ') }}</span>
+      <label
+        v-for="item in paket"
+        :key="item.id"
+        class="block cursor-pointer rounded-tag border p-4 transition hover:border-primary"
+        :class="dipilih === item.id ? 'border-primary bg-primary/5' : 'border-border bg-surface'"
+      >
+        <input v-model="dipilih" type="radio" name="paket" :value="item.id" class="sr-only" />
+        <span class="flex items-center justify-between gap-4"
+          ><span
+            ><strong>{{ item.name }}</strong
+            ><span class="ml-2 text-sm text-muted">{{ item.durationDays }} hari</span></span
+          ><strong class="text-primary">{{ rupiah(item.price) }}</strong></span
+        >
+        <span v-if="item.features?.length" class="mt-2 block text-sm text-muted">{{
+          item.features.join(', ')
+        }}</span>
       </label>
       <p v-if="gagal" class="text-sm text-danger" role="alert">{{ gagal }}</p>
       <p v-if="pesan" class="text-sm text-primary" role="status">{{ pesan }}</p>

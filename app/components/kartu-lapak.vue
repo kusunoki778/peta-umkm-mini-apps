@@ -2,7 +2,7 @@
 export interface KartuLapak {
   slug: string
   name: string
-  category: { name: string, color: string }
+  category: { name: string; color: string }
   distanceMeters: number | null
   isBoosted: boolean
   photoUrl: string | null
@@ -43,7 +43,7 @@ const jarak = computed(() => {
       height="56"
       loading="lazy"
       class="size-14 shrink-0 rounded-tag object-cover"
-    >
+    />
     <span
       v-else
       class="flex size-14 shrink-0 items-center justify-center rounded-tag border border-dashed border-border text-[0.6875rem] text-muted"
@@ -64,7 +64,11 @@ const jarak = computed(() => {
       </span>
       <span class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
         <span class="flex items-center gap-1.5">
-          <span class="size-2 rounded-full" :style="{ backgroundColor: lapak.category.color }" aria-hidden="true" />
+          <span
+            class="size-2 rounded-full"
+            :style="{ backgroundColor: lapak.category.color }"
+            aria-hidden="true"
+          />
           {{ lapak.category.name }}
         </span>
         <template v-if="jarak">

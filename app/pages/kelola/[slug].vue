@@ -6,8 +6,8 @@ definePageMeta({ middleware: 'auth' })
 const route = useRoute()
 const slug = computed(() => String(route.params.slug ?? ''))
 
-type Item = { id: string, name: string, price: number | null, description: string | null }
-type Hour = { id: string, day: number, openTime: string, closeTime: string, closed: boolean }
+type Item = { id: string; name: string; price: number | null; description: string | null }
+type Hour = { id: string; day: number; openTime: string; closeTime: string; closed: boolean }
 
 type Detail = {
   id: string
@@ -23,15 +23,18 @@ type Detail = {
   isOwner: boolean
   isBoosted: boolean
   boostEndsAt: string | null
-  category: { name: string, color: string }
-  photos: { id: string, url: string, alt: string | null }[]
+  category: { name: string; color: string }
+  photos: { id: string; url: string; alt: string | null }[]
   items: Item[]
   hours: Hour[]
 }
 
-const { data: business, status, error, refresh } = await useFetch<Detail>(
-  () => `/api/businesses/${slug.value}`,
-)
+const {
+  data: business,
+  status,
+  error,
+  refresh,
+} = await useFetch<Detail>(() => `/api/businesses/${slug.value}`)
 
 useSeoMeta({ title: () => business.value?.name ?? 'Kelola lapak' })
 
@@ -61,12 +64,10 @@ async function kirim(fn: () => Promise<unknown>, pesanSukses: string) {
     await fn()
     await refresh()
     pesan.value = pesanSukses
-  }
-  catch (err) {
+  } catch (err) {
     const failure = err as FetchError<{ message?: string }>
     pesanError.value = failure.data?.message ?? 'Perubahan gagal disimpan.'
-  }
-  finally {
+  } finally {
     sibuk.value = false
   }
 }
@@ -78,24 +79,28 @@ function tambahItem() {
   const businessId = business.value?.id
   if (!businessId) return
   return kirim(
-    () => $fetch<{ id: string }>(`/api/businesses/${businessId}/items`, {
-      method: 'POST',
-      body: {
-        name: itemBaru.name,
-        price: itemBaru.price === '' ? null : Number(itemBaru.price),
-        description: itemBaru.description || null,
-      },
-    }),
+    () =>
+      $fetch<{ id: string }>(`/api/businesses/${businessId}/items`, {
+        method: 'POST',
+        body: {
+          name: itemBaru.name,
+          price: itemBaru.price === '' ? null : Number(itemBaru.price),
+          description: itemBaru.description || null,
+        },
+      }),
     'Item ditambahkan.',
   ).then(() => Object.assign(itemBaru, { name: '', price: '', description: '' }))
 }
 
 function hapusItem(itemId: string) {
-  return kirim(() => $fetch<{ ok: boolean }>(`/api/items/${itemId}`, { method: 'DELETE' }), 'Item dihapus.')
+  return kirim(
+    () => $fetch<{ ok: boolean }>(`/api/items/${itemId}`, { method: 'DELETE' }),
+    'Item dihapus.',
+  )
 }
 
 // --- Jam buka -----------------------------------------------------------
-const jamDraft = ref<{ day: number, openTime: string, closeTime: string, closed: boolean }[]>([])
+const jamDraft = ref<{ day: number; openTime: string; closeTime: string; closed: boolean }[]>([])
 
 watchEffect(() => {
   if (!business.value) return
@@ -114,17 +119,26 @@ function simpanJam() {
   const businessId = business.value?.id
   if (!businessId) return
   return kirim(
-    () => $fetch<{ ok: boolean }>(`/api/businesses/${businessId}/hours`, {
-      method: 'PUT',
-      body: { hours: jamDraft.value },
-    }),
+    () =>
+      $fetch<{ ok: boolean }>(`/api/businesses/${businessId}/hours`, {
+        method: 'PUT',
+        body: { hours: jamDraft.value },
+      }),
     'Jam buka disimpan.',
   )
 }
 
 // --- Identitas lapak ----------------------------------------------------
 const edit = ref(false)
-const form = reactive({ name: '', address: '', description: '', phone: '', whatsapp: '', latitude: '', longitude: '' })
+const form = reactive({
+  name: '',
+  address: '',
+  description: '',
+  phone: '',
+  whatsapp: '',
+  latitude: '',
+  longitude: '',
+})
 
 function mulaiEdit() {
   if (!business.value) return
@@ -145,20 +159,23 @@ function simpanEdit() {
   const businessId = business.value?.id
   if (!businessId) return
   return kirim(
-    () => $fetch<{ id: string }>(`/api/businesses/${businessId}`, {
-      method: 'PATCH',
-      body: {
-        name: form.name,
-        address: form.address,
-        description: form.description || null,
-        phone: form.phone || null,
-        whatsapp: form.whatsapp || null,
-        latitude: Number(form.latitude),
-        longitude: Number(form.longitude),
-      },
-    }),
+    () =>
+      $fetch<{ id: string }>(`/api/businesses/${businessId}`, {
+        method: 'PATCH',
+        body: {
+          name: form.name,
+          address: form.address,
+          description: form.description || null,
+          phone: form.phone || null,
+          whatsapp: form.whatsapp || null,
+          latitude: Number(form.latitude),
+          longitude: Number(form.longitude),
+        },
+      }),
     'Data lapak disimpan.',
-  ).then(() => { edit.value = false })
+  ).then(() => {
+    edit.value = false
+  })
 }
 
 const konfirmasiHapus = ref(false)
@@ -174,7 +191,11 @@ function hapusLapak() {
 
 function rupiah(value: number | null) {
   if (value === null) return 'Tanya pemilik'
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value)
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+  }).format(value)
 }
 </script>
 
@@ -184,9 +205,15 @@ function rupiah(value: number | null) {
       Kembali ke daftar lapak
     </NuxtLink>
 
-    <p v-if="error" role="alert" class="mt-6 rounded-lg border border-danger bg-danger/10 px-3 py-2 text-sm text-danger">
+    <p
+      v-if="error"
+      role="alert"
+      class="mt-6 rounded-lg border border-danger bg-danger/10 px-3 py-2 text-sm text-danger"
+    >
       Lapak gagal dimuat. Pastikan lapak ini milik akunmu.
-      <button type="button" class="underline underline-offset-2" @click="refresh()">Coba lagi</button>
+      <button type="button" class="underline underline-offset-2" @click="refresh()">
+        Coba lagi
+      </button>
     </p>
 
     <div v-else-if="status === 'pending'" class="mt-6 space-y-3" aria-hidden="true">
@@ -200,7 +227,11 @@ function rupiah(value: number | null) {
         <h1 class="font-display text-2xl font-semibold text-ink">{{ business.name }}</h1>
         <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">
           <span class="inline-flex items-center gap-1.5">
-            <span class="inline-block size-2.5 rounded-full" :style="{ backgroundColor: business.category.color }" aria-hidden="true" />
+            <span
+              class="inline-block size-2.5 rounded-full"
+              :style="{ backgroundColor: business.category.color }"
+              aria-hidden="true"
+            />
             {{ business.category.name }}
           </span>
           <span aria-hidden="true">·</span>
@@ -227,7 +258,10 @@ function rupiah(value: number | null) {
         {{ pesanError }}
       </p>
 
-      <NuxtLink :to="`/kelola/boost/${route.params.slug}`" class="mt-6 inline-flex min-h-11 items-center rounded-tag bg-accent px-4 font-semibold text-ink hover:bg-accent/80">
+      <NuxtLink
+        :to="`/kelola/boost/${route.params.slug}`"
+        class="mt-6 inline-flex min-h-11 items-center rounded-tag bg-accent px-4 font-semibold text-ink hover:bg-accent/80"
+      >
         Boost lapak
       </NuxtLink>
 
@@ -262,8 +296,20 @@ function rupiah(value: number | null) {
             <AppField id="ubah-whatsapp" v-model="form.whatsapp" label="WhatsApp" type="tel" />
           </div>
           <div class="grid gap-4 sm:grid-cols-2">
-            <AppField id="ubah-lintang" v-model="form.latitude" label="Lintang" type="number" required />
-            <AppField id="ubah-bujur" v-model="form.longitude" label="Bujur" type="number" required />
+            <AppField
+              id="ubah-lintang"
+              v-model="form.latitude"
+              label="Lintang"
+              type="number"
+              required
+            />
+            <AppField
+              id="ubah-bujur"
+              v-model="form.longitude"
+              label="Bujur"
+              type="number"
+              required
+            />
           </div>
           <div class="flex gap-2">
             <button
@@ -299,9 +345,11 @@ function rupiah(value: number | null) {
           <div>
             <dt class="text-muted">Koordinat</dt>
             <dd class="text-ink">
-              {{ business.latitude === null || business.longitude === null
-                ? 'Belum diisi'
-                : `${business.latitude}, ${business.longitude}` }}
+              {{
+                business.latitude === null || business.longitude === null
+                  ? 'Belum diisi'
+                  : `${business.latitude}, ${business.longitude}`
+              }}
             </dd>
           </div>
           <div class="sm:col-span-2">
@@ -312,10 +360,22 @@ function rupiah(value: number | null) {
       </section>
 
       <section class="mt-6 rounded-xl border border-border bg-surface p-4">
+        <h2 class="font-display text-lg font-semibold text-ink">Foto lapak</h2>
+        <p class="mt-1 mb-3 text-sm text-muted">
+          Foto tampil di kartu peta dan halaman detail lapak.
+        </p>
+        <UnggahFoto :business-id="business.id" :photos="business.photos" @berubah="refresh()" />
+      </section>
+
+      <section class="mt-6 rounded-xl border border-border bg-surface p-4">
         <h2 class="font-display text-lg font-semibold text-ink">Menu atau layanan</h2>
 
         <ul v-if="business.items.length" class="mt-3 divide-y divide-border">
-          <li v-for="item in business.items" :key="item.id" class="flex items-start justify-between gap-3 py-2">
+          <li
+            v-for="item in business.items"
+            :key="item.id"
+            class="flex items-start justify-between gap-3 py-2"
+          >
             <div>
               <p class="text-ink">{{ item.name }}</p>
               <p class="text-sm text-muted">{{ item.description || 'Tanpa keterangan' }}</p>
@@ -337,7 +397,11 @@ function rupiah(value: number | null) {
           Belum ada item. Tambahkan menu atau layanan supaya pembeli tahu apa yang ditawarkan.
         </p>
 
-        <form class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto]" novalidate @submit.prevent="tambahItem">
+        <form
+          class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto]"
+          novalidate
+          @submit.prevent="tambahItem"
+        >
           <div class="space-y-1.5">
             <label for="item-nama" class="block text-sm font-medium text-ink">Nama item</label>
             <input
@@ -345,7 +409,7 @@ function rupiah(value: number | null) {
               v-model="itemBaru.name"
               required
               class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-base text-ink"
-            >
+            />
           </div>
           <div class="space-y-1.5">
             <label for="item-harga" class="block text-sm font-medium text-ink">Harga</label>
@@ -357,7 +421,7 @@ function rupiah(value: number | null) {
               step="500"
               class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-base text-ink sm:w-32"
               placeholder="Opsional"
-            >
+            />
           </div>
           <div class="flex items-end">
             <button
@@ -390,16 +454,16 @@ function rupiah(value: number | null) {
               :disabled="row.closed"
               :aria-label="`Jam buka ${HARI[row.day]}`"
               class="rounded-lg border border-border bg-surface px-2 py-1.5 text-ink disabled:opacity-50"
-            >
+            />
             <input
               v-model="row.closeTime"
               type="time"
               :disabled="row.closed"
               :aria-label="`Jam tutup ${HARI[row.day]}`"
               class="rounded-lg border border-border bg-surface px-2 py-1.5 text-ink disabled:opacity-50"
-            >
+            />
             <label class="flex items-center gap-1.5 text-muted">
-              <input v-model="row.closed" type="checkbox">
+              <input v-model="row.closed" type="checkbox" />
               Tutup
             </label>
           </div>

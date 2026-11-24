@@ -9,6 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "nuxt typecheck",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
@@ -26,6 +28,7 @@
     "nuxt": "^4.6.4",
     "nuxt-auth-utils": "^0.6.2",
     "pg": "^8.23.1",
+    "sharp": "^0.35.5",
     "vue": "^3.5.45",
     "vue-router": "^5.4.0",
     "zod": "^4.6.7"

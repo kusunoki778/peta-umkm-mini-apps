@@ -49,7 +49,16 @@
   }
 
   /* Semua kontrol yang aktif menunjukkan bisa diklik (R-39). */
-  :where(a, button, [role='button'], label, summary, select, input[type='checkbox'], input[type='radio']):not(:disabled) {
+  :where(
+    a,
+    button,
+    [role='button'],
+    label,
+    summary,
+    select,
+    input[type='checkbox'],
+    input[type='radio']
+  ):not(:disabled) {
     cursor: pointer;
   }
 

@@ -40,7 +40,7 @@ const describedBy = computed(() => {
       class="w-full rounded-lg border bg-surface px-3 py-2 text-base text-ink placeholder:text-muted"
       :class="error ? 'border-danger' : 'border-border'"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-    >
+    />
 
     <p v-if="error" :id="`${id}-error`" class="text-sm text-danger">{{ error }}</p>
     <p v-else-if="hint" :id="`${id}-hint`" class="text-sm text-muted">{{ hint }}</p>

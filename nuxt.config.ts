@@ -8,7 +8,8 @@ export default defineNuxtConfig({
     // Kunci ini dibaca Nitro dari env dengan nama NUXT_MIDTRANS_SERVER_KEY.
     // Nilai di bawah hanya cadangan saat env tidak ada, dan sengaja memakai
     // process.env supaya nama lama (MIDTRANS_SERVER_KEY) tetap terbaca.
-    midtransServerKey: process.env.NUXT_MIDTRANS_SERVER_KEY ?? process.env.MIDTRANS_SERVER_KEY ?? '',
+    midtransServerKey:
+      process.env.NUXT_MIDTRANS_SERVER_KEY ?? process.env.MIDTRANS_SERVER_KEY ?? '',
     // nuxt-auth-utils menyetel cookie sesi `Secure` secara bawaan. Saat pratinjau
     // build produksi di mesin lokal, aplikasi disajikan lewat http, jadi cookie
     // itu ditolak browser dan pengguna tidak pernah benar-benar masuk.
@@ -36,8 +37,16 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
-          content:
-            'Peta lapak UMKM di sekitar kampus: tempat makan, kos, dan jasa.',
+          content: 'Peta lapak UMKM di sekitar kampus: tempat makan, kos, dan jasa.',
+        },
+      ],
+      // Tema dibaca sebelum badan halaman digambar. Tanpa ini, pengguna mode
+      // gelap melihat kedip putih setiap kali halaman dimuat ulang.
+      script: [
+        {
+          key: 'tema-awal',
+          innerHTML: `try{var t=localStorage.getItem('lapak-peta-tema');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'gelap':'terang'}if(t==='gelap'){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark'}}catch(e){}`,
+          tagPosition: 'head',
         },
       ],
     },

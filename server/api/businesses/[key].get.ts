@@ -4,7 +4,7 @@
  * Nitro (radix3) gagal mencocokkan rute bersarang bila dua nama parameter
  * berbeda, misalnya :id dan :slug, menempati posisi segmen yang sama.
  */
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const key = getRouterParam(event, 'key')
   if (!key) throw fail(400, 'Lapak tidak ada.')
 

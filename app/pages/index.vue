@@ -18,11 +18,11 @@ interface ItemPeta {
   isBoosted: boolean
   boostEndsAt: string | null
   photoUrl: string | null
-  category: { slug: string, name: string, color: string }
+  category: { slug: string; name: string; color: string }
 }
 
 interface HasilDaftar {
-  origin: { lat: number, lng: number } | null
+  origin: { lat: number; lng: number } | null
   radius: number | null
   total: number
   items: ItemPeta[]
@@ -44,9 +44,11 @@ const statusLokasi = ref<'idle' | 'meminta' | 'dapat' | 'ditolak'>('idle')
 const pesanLokasi = ref('')
 
 let jedaCari: ReturnType<typeof setTimeout> | undefined
-watch(cari, (nilai) => {
+watch(cari, nilai => {
   clearTimeout(jedaCari)
-  jedaCari = setTimeout(() => { cariAktif.value = nilai.trim() }, 300)
+  jedaCari = setTimeout(() => {
+    cariAktif.value = nilai.trim()
+  }, 300)
 })
 onBeforeUnmount(() => clearTimeout(jedaCari))
 
@@ -72,13 +74,14 @@ const adaError = computed(() => status.value === 'error')
 function alihkanKategori(slug: string) {
   const posisi = kategoriDipilih.value.indexOf(slug)
   if (posisi === -1) kategoriDipilih.value = [...kategoriDipilih.value, slug]
-  else kategoriDipilih.value = kategoriDipilih.value.filter((s) => s !== slug)
+  else kategoriDipilih.value = kategoriDipilih.value.filter(s => s !== slug)
 }
 
 function pakaiLokasiSaya() {
   if (!import.meta.client || !navigator.geolocation) {
     statusLokasi.value = 'ditolak'
-    pesanLokasi.value = 'Peramban ini belum mendukung deteksi lokasi. Isi titik pusat secara manual lewat peta.'
+    pesanLokasi.value =
+      'Peramban ini belum mendukung deteksi lokasi. Isi titik pusat secara manual lewat peta.'
     return
   }
 
@@ -86,16 +89,17 @@ function pakaiLokasiSaya() {
   pesanLokasi.value = ''
 
   navigator.geolocation.getCurrentPosition(
-    (posisi) => {
+    posisi => {
       pusat.value = { lat: posisi.coords.latitude, lng: posisi.coords.longitude }
       statusLokasi.value = 'dapat'
       pesanLokasi.value = 'Titik pusat sekarang memakai lokasi kamu.'
     },
-    (galat) => {
+    galat => {
       statusLokasi.value = 'ditolak'
-      pesanLokasi.value = galat.code === galat.PERMISSION_DENIED
-        ? 'Izin lokasi ditolak. Daftar dan peta tetap memakai titik pusat kampus.'
-        : 'Lokasi tidak bisa dibaca. Daftar dan peta tetap memakai titik pusat kampus.'
+      pesanLokasi.value =
+        galat.code === galat.PERMISSION_DENIED
+          ? 'Izin lokasi ditolak. Daftar dan peta tetap memakai titik pusat kampus.'
+          : 'Lokasi tidak bisa dibaca. Daftar dan peta tetap memakai titik pusat kampus.'
     },
     { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
   )
@@ -108,6 +112,12 @@ function kembaliKeKampus() {
 }
 
 const adaFilter = computed(() => Boolean(cariAktif.value) || kategoriDipilih.value.length > 0)
+
+function hapusSemuaFilter() {
+  cari.value = ''
+  cariAktif.value = ''
+  kategoriDipilih.value = []
+}
 </script>
 
 <template>
@@ -118,8 +128,8 @@ const adaFilter = computed(() => Boolean(cariAktif.value) || kategoriDipilih.val
           Temukan lapak di sekitarmu
         </h1>
         <p class="mt-2 max-w-prose text-sm text-muted">
-          Warung, kos, dan bengkel di sekitar kampus. Urutan daftar mendahulukan lapak
-          unggulan, lalu jarak terdekat.
+          Warung, kos, dan bengkel di sekitar kampus. Urutan daftar mendahulukan lapak unggulan,
+          lalu jarak terdekat.
         </p>
       </div>
       <NuxtLink
@@ -139,7 +149,7 @@ const adaFilter = computed(() => Boolean(cariAktif.value) || kategoriDipilih.val
           type="search"
           placeholder="Cari nama lapak, misalnya kopi"
           class="min-h-11 w-full rounded-tag border border-border bg-surface px-3 text-sm placeholder:text-muted"
-        >
+        />
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
@@ -172,7 +182,12 @@ const adaFilter = computed(() => Boolean(cariAktif.value) || kategoriDipilih.val
       </div>
     </div>
 
-    <p v-if="pesanLokasi" class="mt-2 text-sm" :class="statusLokasi === 'ditolak' ? 'text-danger' : 'text-muted'" role="status">
+    <p
+      v-if="pesanLokasi"
+      class="mt-2 text-sm"
+      :class="statusLokasi === 'ditolak' ? 'text-danger' : 'text-muted'"
+      role="status"
+    >
       {{ pesanLokasi }}
     </p>
 
@@ -192,10 +207,14 @@ const adaFilter = computed(() => Boolean(cariAktif.value) || kategoriDipilih.val
       />
     </div>
 
-    <div class="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_26rem]">
+    <div
+      class="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_26rem]"
+    >
       <section aria-label="Peta lapak" class="order-2 lg:order-1">
         <ClientOnly>
-          <div class="h-[26rem] overflow-hidden rounded-tag border border-border lg:h-[calc(100vh-15rem)]">
+          <div
+            class="h-[26rem] overflow-hidden rounded-tag border border-border lg:h-[calc(100vh-15rem)]"
+          >
             <PetaLapak
               :items="daftar"
               :pusat="pusat"
@@ -205,7 +224,9 @@ const adaFilter = computed(() => Boolean(cariAktif.value) || kategoriDipilih.val
             />
           </div>
           <template #fallback>
-            <div class="flex h-[26rem] items-center justify-center rounded-tag border border-dashed border-border text-sm text-muted lg:h-[calc(100vh-15rem)]">
+            <div
+              class="flex h-[26rem] items-center justify-center rounded-tag border border-dashed border-border text-sm text-muted lg:h-[calc(100vh-15rem)]"
+            >
               Memuat peta...
             </div>
           </template>
@@ -225,15 +246,17 @@ const adaFilter = computed(() => Boolean(cariAktif.value) || kategoriDipilih.val
         <!-- Keadaan memuat -->
         <ul v-if="memuat" class="space-y-2" aria-busy="true" aria-live="polite">
           <li class="sr-only">Memuat daftar lapak.</li>
-          <li v-for="n in 4" :key="n" class="h-[5.25rem] animate-pulse rounded-tag border border-border bg-surface" />
+          <li
+            v-for="n in 4"
+            :key="n"
+            class="h-[5.25rem] animate-pulse rounded-tag border border-border bg-surface"
+          />
         </ul>
 
         <!-- Keadaan galat -->
         <div v-else-if="adaError" class="rounded-tag border border-danger/40 bg-surface p-4">
           <p class="font-medium text-danger">Daftar lapak gagal dimuat.</p>
-          <p class="mt-1 text-sm text-muted">
-            Sambungan ke server terputus. Coba muat ulang.
-          </p>
+          <p class="mt-1 text-sm text-muted">Sambungan ke server terputus. Coba muat ulang.</p>
           <button
             type="button"
             class="mt-3 inline-flex min-h-11 items-center rounded-tag border border-border px-3 text-sm hover:border-muted"
@@ -244,12 +267,13 @@ const adaFilter = computed(() => Boolean(cariAktif.value) || kategoriDipilih.val
         </div>
 
         <!-- Keadaan kosong -->
-        <div v-else-if="daftar.length === 0" class="rounded-tag border border-dashed border-border bg-surface p-6 text-center">
+        <div
+          v-else-if="daftar.length === 0"
+          class="rounded-tag border border-dashed border-border bg-surface p-6 text-center"
+        >
           <p class="font-medium">Belum ada lapak yang cocok.</p>
           <p class="mt-1 text-sm text-muted">
-            <template v-if="adaFilter">
-              Coba hapus kata kunci atau pilih kategori lain.
-            </template>
+            <template v-if="adaFilter"> Coba hapus kata kunci atau pilih kategori lain. </template>
             <template v-else>
               Belum ada pemilik yang mendaftarkan lapak di sekitar titik ini.
             </template>
@@ -258,7 +282,7 @@ const adaFilter = computed(() => Boolean(cariAktif.value) || kategoriDipilih.val
             v-if="adaFilter"
             type="button"
             class="mt-4 inline-flex min-h-11 items-center rounded-tag bg-primary px-4 text-sm font-medium text-white hover:bg-primary/90"
-            @click="cari = ''; cariAktif = ''; kategoriDipilih = []"
+            @click="hapusSemuaFilter"
           >
             Hapus semua filter
           </button>

@@ -5,18 +5,22 @@ import { requireOwnedBusiness } from '../../utils/business'
 import { createSnapToken } from '../../utils/midtrans'
 import { fail } from '../../utils/errors'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const user = await requireAuth(event)
-  const body = await readBody<{ businessId?: string, packageId?: number }>(event)
+  const body = await readBody<{ businessId?: string; packageId?: number }>(event)
   if (!body.businessId || !body.packageId) return fail(422, 'Lapak dan paket wajib dipilih.')
   const business = await requireOwnedBusiness(body.businessId, user)
   const pack = await prisma.boostPackage.findFirst({ where: { id: body.packageId, active: true } })
   if (!pack) return fail(404, 'Paket boost tidak ditemukan.')
-  const existing = await prisma.boost.findFirst({ where: { businessId: business.id, status: 'active', endsAt: { gt: new Date() } } })
+  const existing = await prisma.boost.findFirst({
+    where: { businessId: business.id, status: 'active', endsAt: { gt: new Date() } },
+  })
   if (existing) return fail(409, 'Lapak ini masih memiliki boost aktif.')
   const orderId = `boost-${randomUUID()}`
   const boost = await prisma.boost.create({ data: { businessId: business.id, packageId: pack.id } })
-  const payment = await prisma.payment.create({ data: { orderId, boostId: boost.id, amount: pack.price } })
+  const payment = await prisma.payment.create({
+    data: { orderId, boostId: boost.id, amount: pack.price },
+  })
   try {
     const snapToken = await createSnapToken({ orderId, amount: pack.price, customer: user })
     await prisma.payment.update({ where: { id: payment.id }, data: { snapToken } })
@@ -27,9 +31,10 @@ export default defineEventHandler(async (event) => {
       prisma.boost.update({ where: { id: boost.id }, data: { status: 'failed' } }),
     ])
     // Teruskan pesan asli dari utils/midtrans supaya UI bisa menampilkan sebabnya.
-    const detail = (error as { data?: { message?: string } })?.data?.message
-      ?? (error as { statusMessage?: string })?.statusMessage
-      ?? 'Pembayaran gagal disiapkan.'
+    const detail =
+      (error as { data?: { message?: string } })?.data?.message ??
+      (error as { statusMessage?: string })?.statusMessage ??
+      'Pembayaran gagal disiapkan.'
     throw createError({
       statusCode: (error as { statusCode?: number })?.statusCode ?? 502,
       statusMessage: detail,

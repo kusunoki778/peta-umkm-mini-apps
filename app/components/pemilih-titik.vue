@@ -2,7 +2,7 @@
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-const props = withDefaults(defineProps<{ latitude?: number | null, longitude?: number | null }>(), {
+const props = withDefaults(defineProps<{ latitude?: number | null; longitude?: number | null }>(), {
   latitude: null,
   longitude: null,
 })
@@ -29,14 +29,24 @@ onMounted(() => {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19,
   }).addTo(peta)
-  if (props.latitude !== null && props.longitude !== null) pasangPenanda(props.latitude, props.longitude)
-  peta.on('click', (event: L.LeafletMouseEvent) => pasangPenanda(event.latlng.lat, event.latlng.lng))
+  if (props.latitude !== null && props.longitude !== null)
+    pasangPenanda(props.latitude, props.longitude)
+  peta.on('click', (event: L.LeafletMouseEvent) =>
+    pasangPenanda(event.latlng.lat, event.latlng.lng),
+  )
 })
 
 watch(
   () => [props.latitude, props.longitude] as const,
   ([latitude, longitude]) => {
-    if (!peta || latitude === null || latitude === undefined || longitude === null || longitude === undefined) return
+    if (
+      !peta ||
+      latitude === null ||
+      latitude === undefined ||
+      longitude === null ||
+      longitude === undefined
+    )
+      return
     peta.setView([latitude, longitude], Math.max(peta.getZoom(), 15))
     penanda?.remove()
     penanda = L.marker([latitude, longitude]).addTo(peta)
@@ -51,5 +61,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="wadah" class="h-64 w-full overflow-hidden rounded-lg border border-border" role="application" aria-label="Pilih titik lokasi lapak di peta" />
+  <div
+    ref="wadah"
+    class="h-64 w-full overflow-hidden rounded-lg border border-border"
+    role="application"
+    aria-label="Pilih titik lokasi lapak di peta"
+  />
 </template>

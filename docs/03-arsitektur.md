@@ -33,18 +33,18 @@ Aplikasi satu repo dengan Nuxt 4. UI berjalan di browser, logika server (API, we
 
 ## 2. Stack
 
-| Lapis | Pilihan | Alasan |
-|---|---|---|
-| Framework | Nuxt 4 | Satu proyek untuk UI dan server API, SSR untuk SEO halaman detail lapak, TypeScript menyeluruh. |
-| Bahasa | TypeScript | Tipe kuat dari basis data sampai UI, cocok untuk portofolio yang rapi. |
-| UI | Vue 3 + Tailwind CSS | Komponen reaktif untuk peta dan filter, Tailwind mempercepat konsistensi desain. |
-| Peta | Leaflet + OpenStreetMap | Gratis, tanpa kunci API, banyak referensi. |
-| Basis data | PostgreSQL + PostGIS | PostGIS menangani pencarian radius dan pengurutan jarak dengan benar. |
-| ORM | Prisma | Umum dipakai, migrasi jelas; query geospasial dilakukan lewat SQL mentah. Alternatif: Drizzle (dukungan PostGIS lebih langsung). |
-| Autentikasi | nuxt-auth-utils (cookie sesi) atau sidebase/nuxt-auth | nuxt-auth-utils ringan dan cukup untuk kredensial dan peran. Alternatif: Auth.js bila butuh penyedia login sosial. |
-| Pembayaran | Midtrans Snap | Sesuai kebutuhan pembayaran lokal, sudah dipakai di proyek pelatihan. |
-| Validasi | Zod | Validasi skema di server dan di klien dari satu sumber. |
-| Unggah foto | Lokal saat pengembangan, S3 atau Cloudinary saat produksi | Sederhana saat mulai, bisa naik ke penyimpanan objek. |
+| Lapis       | Pilihan                                                   | Alasan                                                                                                                           |
+| ----------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Framework   | Nuxt 4                                                    | Satu proyek untuk UI dan server API, SSR untuk SEO halaman detail lapak, TypeScript menyeluruh.                                  |
+| Bahasa      | TypeScript                                                | Tipe kuat dari basis data sampai UI, cocok untuk portofolio yang rapi.                                                           |
+| UI          | Vue 3 + Tailwind CSS                                      | Komponen reaktif untuk peta dan filter, Tailwind mempercepat konsistensi desain.                                                 |
+| Peta        | Leaflet + OpenStreetMap                                   | Gratis, tanpa kunci API, banyak referensi.                                                                                       |
+| Basis data  | PostgreSQL + PostGIS                                      | PostGIS menangani pencarian radius dan pengurutan jarak dengan benar.                                                            |
+| ORM         | Prisma                                                    | Umum dipakai, migrasi jelas; query geospasial dilakukan lewat SQL mentah. Alternatif: Drizzle (dukungan PostGIS lebih langsung). |
+| Autentikasi | nuxt-auth-utils (cookie sesi) atau sidebase/nuxt-auth     | nuxt-auth-utils ringan dan cukup untuk kredensial dan peran. Alternatif: Auth.js bila butuh penyedia login sosial.               |
+| Pembayaran  | Midtrans Snap                                             | Sesuai kebutuhan pembayaran lokal, sudah dipakai di proyek pelatihan.                                                            |
+| Validasi    | Zod                                                       | Validasi skema di server dan di klien dari satu sumber.                                                                          |
+| Unggah foto | Lokal saat pengembangan, S3 atau Cloudinary saat produksi | Sederhana saat mulai, bisa naik ke penyimpanan objek.                                                                            |
 
 ## 3. Struktur Folder
 
@@ -133,17 +133,17 @@ reports (n) >---- businesses            (v1)
 
 ### Tabel utama
 
-| Tabel | Kolom kunci | Catatan |
-|---|---|---|
-| `users` | id, name, email (unik), password_hash, role (`owner` atau `admin`), created_at | Kata sandi di-hash. |
-| `businesses` | id, owner_id, name, slug, category_id, description, address, location `geography(Point,4326)`, status (`pending`, `live`, `rejected`, `inactive`), created_at, updated_at, deleted_at | `location` memakai PostGIS. `deleted_at` untuk hapus lunak. |
-| `photos` | id, business_id, url, sort_order | |
-| `items` | id, business_id, name, price, sort_order | Menu atau layanan. |
-| `opening_hours` | id, business_id, day (0 sampai 6), open_time, close_time, is_closed | |
-| `categories` | id, name, slug, color, icon | Warna mengikuti palet kategori di dokumen desain. |
-| `boost_packages` | id, name, duration_days, price | Data, bukan kode. |
-| `boosts` | id, business_id, package_id, user_id, starts_at, ends_at, status (`pending`, `active`, `expired`, `failed`) | Satu boost aktif per lapak. |
-| `payments` | id, boost_id, order_id (unik), gross_amount, status (`pending`, `settlement`, `expire`, `deny`, `cancel`), payment_type, raw_response (JSONB), created_at | `order_id` untuk Midtrans. |
+| Tabel            | Kolom kunci                                                                                                                                                                           | Catatan                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `users`          | id, name, email (unik), password_hash, role (`owner` atau `admin`), created_at                                                                                                        | Kata sandi di-hash.                                         |
+| `businesses`     | id, owner_id, name, slug, category_id, description, address, location `geography(Point,4326)`, status (`pending`, `live`, `rejected`, `inactive`), created_at, updated_at, deleted_at | `location` memakai PostGIS. `deleted_at` untuk hapus lunak. |
+| `photos`         | id, business_id, url, sort_order                                                                                                                                                      |                                                             |
+| `items`          | id, business_id, name, price, sort_order                                                                                                                                              | Menu atau layanan.                                          |
+| `opening_hours`  | id, business_id, day (0 sampai 6), open_time, close_time, is_closed                                                                                                                   |                                                             |
+| `categories`     | id, name, slug, color, icon                                                                                                                                                           | Warna mengikuti palet kategori di dokumen desain.           |
+| `boost_packages` | id, name, duration_days, price                                                                                                                                                        | Data, bukan kode.                                           |
+| `boosts`         | id, business_id, package_id, user_id, starts_at, ends_at, status (`pending`, `active`, `expired`, `failed`)                                                                           | Satu boost aktif per lapak.                                 |
+| `payments`       | id, boost_id, order_id (unik), gross_amount, status (`pending`, `settlement`, `expire`, `deny`, `cancel`), payment_type, raw_response (JSONB), created_at                             | `order_id` untuk Midtrans.                                  |
 
 ### Indeks penting
 
@@ -195,26 +195,27 @@ Fallback bila PostGIS belum tersedia: simpan `lat` dan `lng` sebagai kolom biasa
 
 Endpoint REST lewat `server/api`. Semua respons JSON. Validasi input dengan Zod.
 
-| Metode | Endpoint | Akses | Keterangan |
-|---|---|---|---|
-| POST | `/api/auth/register` | publik | Daftar akun pemilik. |
-| POST | `/api/auth/login` | publik | Masuk, membuat sesi. |
-| POST | `/api/auth/logout` | masuk | Keluar. |
-| GET | `/api/businesses` | publik | Daftar lapak. Query: `q`, `category`, `lat`, `lng`, `radius`, `page`. |
-| GET | `/api/businesses/:id` | publik | Detail lapak. |
-| POST | `/api/businesses` | pemilik | Tambah lapak. |
-| PATCH | `/api/businesses/:id` | pemilik pemiliknya atau admin | Ubah lapak. |
-| DELETE | `/api/businesses/:id` | pemilik pemiliknya atau admin | Hapus lunak. |
-| POST | `/api/businesses/:id/photos` | pemilik | Unggah foto. |
-| GET | `/api/categories` | publik | Daftar kategori. |
-| GET | `/api/boost-packages` | publik | Daftar paket boost. |
-| POST | `/api/boosts` | pemilik | Buat transaksi boost dan Snap token. |
-| GET | `/api/payments/config` | publik | Status kesiapan kunci Midtrans (tanpa membocorkan nilainya). |
-| POST | `/api/payments/notification` | Midtrans | Webhook pembayaran. Verifikasi tanda tangan. |
-| GET | `/api/boosts/mine` | pemilik | Riwayat boost saya. |
-| GET | `/api/admin/businesses` | admin | Daftar lapak untuk moderasi. |
-| PATCH | `/api/admin/businesses/:id/status` | admin | Setujui, tolak, atau nonaktifkan. |
-| GET | `/api/admin/payments` | admin | Daftar transaksi. |
+| Metode | Endpoint                           | Akses                         | Keterangan                                                            |
+| ------ | ---------------------------------- | ----------------------------- | --------------------------------------------------------------------- |
+| POST   | `/api/auth/register`               | publik                        | Daftar akun pemilik.                                                  |
+| POST   | `/api/auth/login`                  | publik                        | Masuk, membuat sesi.                                                  |
+| POST   | `/api/auth/logout`                 | masuk                         | Keluar.                                                               |
+| GET    | `/api/businesses`                  | publik                        | Daftar lapak. Query: `q`, `category`, `lat`, `lng`, `radius`, `page`. |
+| GET    | `/api/businesses/:id`              | publik                        | Detail lapak.                                                         |
+| POST   | `/api/businesses`                  | pemilik                       | Tambah lapak.                                                         |
+| PATCH  | `/api/businesses/:id`              | pemilik pemiliknya atau admin | Ubah lapak.                                                           |
+| DELETE | `/api/businesses/:id`              | pemilik pemiliknya atau admin | Hapus lunak.                                                          |
+| POST   | `/api/businesses/:id/photos`       | pemilik                       | Unggah foto (multipart, `foto` dan `alt`).                            |
+| DELETE | `/api/photos/:photoId`             | pemilik pemiliknya            | Hapus foto beserta berkasnya.                                         |
+| GET    | `/api/categories`                  | publik                        | Daftar kategori.                                                      |
+| GET    | `/api/boost-packages`              | publik                        | Daftar paket boost.                                                   |
+| POST   | `/api/boosts`                      | pemilik                       | Buat transaksi boost dan Snap token.                                  |
+| GET    | `/api/payments/config`             | publik                        | Status kesiapan kunci Midtrans (tanpa membocorkan nilainya).          |
+| POST   | `/api/payments/notification`       | Midtrans                      | Webhook pembayaran. Verifikasi tanda tangan.                          |
+| GET    | `/api/boosts/mine`                 | pemilik                       | Riwayat boost saya.                                                   |
+| GET    | `/api/admin/businesses`            | admin                         | Daftar lapak untuk moderasi.                                          |
+| PATCH  | `/api/admin/businesses/:id/status` | admin                         | Setujui, tolak, atau nonaktifkan.                                     |
+| GET    | `/api/admin/payments`              | admin                         | Daftar transaksi.                                                     |
 
 Contoh bentuk respons daftar:
 
@@ -271,10 +272,14 @@ Dua jebakan yang sudah ditemui dan harus dijaga:
 
 ## 10. Unggah Foto
 
-- Terima `multipart/form-data` di server, validasi tipe dan ukuran.
-- Kecilkan dan ubah ke format efisien dengan Sharp sebelum disimpan.
-- Pengembangan: simpan di `public/uploads`. Produksi: unggah ke penyimpanan objek (S3 atau Cloudinary) dan simpan URL-nya di basis data.
-- Nama berkas diberi acak untuk mencegah tabrakan dan tebak-tebakan.
+- Terima `multipart/form-data` di `POST /api/businesses/:key/photos`, field `foto` dan `alt` (opsional).
+- Batas: 6 foto per lapak, 5 MB per berkas, format JPG, PNG, atau WebP.
+- Jenis berkas diperiksa dari isinya lewat Sharp, bukan dari nama berkas atau header yang dikirim klien. Berkas yang isinya bukan gambar dijawab `422`, bukan `500`.
+- Setiap unggahan diperkecil menjadi tiga varian WebP (`kartu` 480 px, `detail` 960 px, `besar` 1440 px) dengan `withoutEnlargement`, sehingga foto kecil tidak dipaksa membesar dan jadi kabur.
+- Nama berkas acak berbasis `Date.now()` dan UUID, memuat id acak yang tidak pernah dipakai ulang. Karena itu berkas boleh di-cache lama oleh peramban.
+- Pengembangan: disimpan di `public/uploads`, yang tidak masuk Git.
+- **Penyajian berkas:** folder `public` hanya disalin ke `.output/public` saat build, sehingga foto yang diunggah setelah build tidak akan tersaji oleh penyaji statis Nitro. Karena itu ada rute `server/routes/uploads/[nama].get.ts` yang membaca langsung dari disk. Rute ini juga menolak nama berkas yang tidak cocok pola `^[a-zA-Z0-9-]+\.webp$`, supaya tidak bisa dipakai keluar dari folder unggahan.
+- Produksi: ganti ke penyimpanan objek (S3 atau Cloudinary). Yang perlu diubah hanya `server/utils/foto.ts` dan rute penyajiannya, karena kolom `business_photos.url` hanya menyimpan URL.
 
 ## 11. Keamanan
 
@@ -294,6 +299,20 @@ Dua jebakan yang sudah ditemui dan harus dijaga:
 - Kategori dan paket boost di-cache karena jarang berubah.
 - Halaman detail lapak di-render di server untuk SEO dan muat awal yang cepat.
 - Batasi jumlah marker yang dirender sekaligus dengan clustering.
+- Foto lapak memakai tiga varian ukuran dan atribut `srcset`, sehingga kartu daftar tidak mengunduh gambar 960 px untuk kotak 56 px.
+
+## 12a. Tema Terang dan Gelap
+
+- Kelas `.dark` pada `<html>` mengubah nilai token warna di `main.css`. Komponen tidak memakai warna gelap terpisah, jadi satu set kelas berlaku untuk dua tema.
+- Pilihan disimpan di `localStorage` dengan kunci `lapak-peta-tema`. Bila belum ada pilihan, tema mengikuti `prefers-color-scheme`.
+- Skrip kecil di `app.head.script` dijalankan sebelum halaman digambar. Tanpa ini, pengguna mode gelap melihat kedip putih setiap memuat ulang.
+- Komposabel `useTema()` memegang status dan tombol ganti tema ada di header.
+
+## 12b. Format Kode
+
+- ESLint memegang aturan kebenaran (`npm run lint`), Prettier memegang format (`npm run format`, `npm run format:check`).
+- Aturan `vue/html-self-closing` diselaraskan dengan keluaran Prettier. Tanpa penyesuaian itu, `npm run format` dan `npm run lint` saling bertentangan pada `<input />` dan `<img />`.
+- Prettier pernah memecah ekspresi `@click` yang berisi beberapa pernyataan menjadi beberapa baris yang tidak valid dan membuat build gagal. Karena itu rangkaian pernyataan di template dipindah ke fungsi di `<script setup>`.
 
 ## 13. Deployment dan Konfigurasi
 
@@ -316,10 +335,10 @@ UPLOAD_DIR="public/uploads"
 
 ## 14. Keputusan Arsitektur
 
-| Keputusan | Alasan |
-|---|---|
-| Nuxt 4 satu proyek, bukan dua aplikasi | Mengurangi kerumitan CORS dan deploy, dan satu bahasa untuk seluruh kode. |
-| PostGIS, bukan pencarian jarak di aplikasi | Query radius dan urutan jarak lebih akurat dan cepat, serta menunjukkan kemampuan basis data. |
-| Prisma dengan SQL mentah untuk geospasial | Prisma memudahkan CRUD dan migrasi; query PostGIS yang tidak didukung ditulis sebagai SQL mentah. |
-| Gaya marker lewat `divIcon` | Membuat marker emas dan denyut boost bisa ditata dengan CSS yang sama seperti komponen lain. |
-| Pembayaran lewat webhook sebagai sumber kebenaran | Status pembayaran tidak boleh ditentukan dari sisi klien saja. |
+| Keputusan                                         | Alasan                                                                                            |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Nuxt 4 satu proyek, bukan dua aplikasi            | Mengurangi kerumitan CORS dan deploy, dan satu bahasa untuk seluruh kode.                         |
+| PostGIS, bukan pencarian jarak di aplikasi        | Query radius dan urutan jarak lebih akurat dan cepat, serta menunjukkan kemampuan basis data.     |
+| Prisma dengan SQL mentah untuk geospasial         | Prisma memudahkan CRUD dan migrasi; query PostGIS yang tidak didukung ditulis sebagai SQL mentah. |
+| Gaya marker lewat `divIcon`                       | Membuat marker emas dan denyut boost bisa ditata dengan CSS yang sama seperti komponen lain.      |
+| Pembayaran lewat webhook sebagai sumber kebenaran | Status pembayaran tidak boleh ditentukan dari sisi klien saja.                                    |

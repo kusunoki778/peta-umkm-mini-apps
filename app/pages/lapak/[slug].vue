@@ -27,8 +27,8 @@ interface Detail {
   isOwner: boolean
   isBoosted: boolean
   boostEndsAt: string | null
-  category: { name: string, color: string, slug: string }
-  photos: { id: string, url: string, alt: string | null }[]
+  category: { name: string; color: string; slug: string }
+  photos: { id: string; url: string; alt: string | null }[]
   items: Item[]
   hours: Jam[]
 }
@@ -47,20 +47,66 @@ if (error.value && import.meta.server) {
 
 const HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 
-useHead(() => ({
-  title: lapak.value?.name ?? 'Lapak',
-  meta: lapak.value?.description
-    ? [{ name: 'description', content: lapak.value.description.slice(0, 155) }]
-    : [],
-}))
+// SEO halaman detail: judul, deskripsi, dan pratinjau tautan. Foto pertama dipakai
+// sebagai gambar pratinjau karena stok foto lapak memang berasal dari pemiliknya.
+useHead(() => {
+  const data = lapak.value
+  const deskripsi =
+    data?.description?.slice(0, 155) ??
+    (data ? `${data.name} di ${data.address}, kategori ${data.category.name}.` : undefined)
+  const gambar = data?.photos?.[0]?.url.replace('-kartu.webp', '-detail.webp')
+  const url = data ? `/lapak/${data.slug}` : undefined
+
+  return {
+    title: data?.name ?? 'Lapak',
+    link: url ? [{ rel: 'canonical', href: url }] : [],
+    meta: [
+      ...(deskripsi ? [{ name: 'description', content: deskripsi }] : []),
+      ...(data ? [{ property: 'og:type', content: 'business.business' }] : []),
+      ...(url ? [{ property: 'og:url', content: url }] : []),
+      ...(data ? [{ property: 'og:title', content: data.name }] : []),
+      ...(deskripsi ? [{ property: 'og:description', content: deskripsi }] : []),
+      ...(gambar ? [{ property: 'og:image', content: gambar }] : []),
+      ...(gambar ? [{ name: 'twitter:card', content: 'summary_large_image' }] : []),
+    ],
+    script: data
+      ? [
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'LocalBusiness',
+              name: data.name,
+              description: deskripsi,
+              address: { '@type': 'PostalAddress', streetAddress: data.address },
+              ...(data.phone ? { telephone: data.phone } : {}),
+              ...(data.latitude !== null && data.longitude !== null
+                ? {
+                    geo: {
+                      '@type': 'GeoCoordinates',
+                      latitude: data.latitude,
+                      longitude: data.longitude,
+                    },
+                  }
+                : {}),
+            }),
+          },
+        ]
+      : [],
+  }
+})
 
 function rupiah(nilai: number | null) {
   if (nilai === null) return 'Tanya pemilik'
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(nilai)
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+  }).format(nilai)
 }
 
 const hariIni = new Date().getDay()
-const jamHariIni = computed(() => lapak.value?.hours.find((h) => h.day === hariIni) ?? null)
+const jamHariIni = computed(() => lapak.value?.hours.find(h => h.day === hariIni) ?? null)
 
 const jamTerurut = computed(() => {
   const daftar = lapak.value?.hours ?? []
@@ -88,9 +134,11 @@ const nomorWhatsapp = computed(() => {
     <div v-else-if="status === 'error'" class="rounded-tag border border-danger/40 bg-surface p-6">
       <h1 class="font-display text-xl font-semibold text-danger">Lapak ini tidak bisa dibuka.</h1>
       <p class="mt-2 text-sm text-muted">
-        {{ error?.statusCode === 404
-          ? 'Alamatnya salah, atau lapaknya sudah dihapus pemilik.'
-          : 'Server tidak menjawab. Coba muat ulang halaman.' }}
+        {{
+          error?.statusCode === 404
+            ? 'Alamatnya salah, atau lapaknya sudah dihapus pemilik.'
+            : 'Server tidak menjawab. Coba muat ulang halaman.'
+        }}
       </p>
       <NuxtLink
         to="/"
@@ -109,10 +157,17 @@ const nomorWhatsapp = computed(() => {
       </NuxtLink>
       <div class="flex items-center gap-2 text-sm">
         <span class="flex items-center gap-1.5 text-muted">
-          <span class="size-2.5 rounded-full" :style="{ backgroundColor: lapak.category.color }" aria-hidden="true" />
+          <span
+            class="size-2.5 rounded-full"
+            :style="{ backgroundColor: lapak.category.color }"
+            aria-hidden="true"
+          />
           {{ lapak.category.name }}
         </span>
-        <span v-if="lapak.isBoosted" class="rounded-tag bg-accent/15 px-1.5 py-0.5 text-xs font-semibold text-accent">
+        <span
+          v-if="lapak.isBoosted"
+          class="rounded-tag bg-accent/15 px-1.5 py-0.5 text-xs font-semibold text-accent"
+        >
           Lapak unggulan
         </span>
         <span
@@ -152,24 +207,39 @@ const nomorWhatsapp = computed(() => {
         <img
           v-for="foto in lapak.photos"
           :key="foto.id"
-          :src="foto.url"
+          :src="foto.url.replace('-kartu.webp', '-detail.webp')"
+          :srcset="`${foto.url} 480w, ${foto.url.replace('-kartu.webp', '-detail.webp')} 960w`"
+          sizes="(min-width: 640px) 240px, 45vw"
           :alt="foto.alt ?? `Foto ${lapak.name}`"
-          width="320"
-          height="240"
+          width="480"
+          height="360"
           loading="lazy"
-          class="aspect-[4/3] w-full rounded-tag object-cover"
-        >
+          decoding="async"
+          class="aspect-[4/3] w-full rounded-tag border border-border object-cover"
+        />
       </div>
 
       <section class="mt-8">
         <h2 class="font-display text-lg font-semibold">Menu dan layanan</h2>
-        <ul v-if="lapak.items.length" class="mt-3 divide-y divide-border rounded-tag border border-border bg-surface">
-          <li v-for="item in lapak.items" :key="item.id" class="flex items-start justify-between gap-4 p-3">
+        <ul
+          v-if="lapak.items.length"
+          class="mt-3 divide-y divide-border rounded-tag border border-border bg-surface"
+        >
+          <li
+            v-for="item in lapak.items"
+            :key="item.id"
+            class="flex items-start justify-between gap-4 p-3"
+          >
             <span class="min-w-0">
               <span class="block font-medium">{{ item.name }}</span>
-              <span v-if="item.description" class="mt-0.5 block text-sm text-muted">{{ item.description }}</span>
+              <span v-if="item.description" class="mt-0.5 block text-sm text-muted">{{
+                item.description
+              }}</span>
             </span>
-            <span class="shrink-0 text-sm tabular-nums" :class="item.price === null ? 'text-muted' : ''">
+            <span
+              class="shrink-0 text-sm tabular-nums"
+              :class="item.price === null ? 'text-muted' : ''"
+            >
               {{ rupiah(item.price) }}
             </span>
           </li>
@@ -184,7 +254,10 @@ const nomorWhatsapp = computed(() => {
           <template v-if="jamHariIni.closed">tutup</template>
           <template v-else>{{ jamHariIni.openTime }} sampai {{ jamHariIni.closeTime }}</template>
         </p>
-        <ul v-if="jamTerurut.length" class="mt-3 divide-y divide-border rounded-tag border border-border bg-surface text-sm">
+        <ul
+          v-if="jamTerurut.length"
+          class="mt-3 divide-y divide-border rounded-tag border border-border bg-surface text-sm"
+        >
           <li
             v-for="jam in jamTerurut"
             :key="jam.day"

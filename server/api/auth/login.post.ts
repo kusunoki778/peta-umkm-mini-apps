@@ -1,15 +1,11 @@
 import { z } from 'zod'
 
 const bodySchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .pipe(z.email('Format email tidak valid.')),
+  email: z.string().trim().toLowerCase().pipe(z.email('Format email tidak valid.')),
   password: z.string().min(1, 'Kata sandi wajib diisi.'),
 })
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const parsed = bodySchema.safeParse(await readBody(event))
   if (!parsed.success) {
     throw fail(422, parsed.error.issues[0]?.message ?? 'Data masuk tidak valid.')

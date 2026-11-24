@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const user = await requireAuth(event)
   const itemId = getRouterParam(event, 'itemId')
   if (!itemId) throw fail(400, 'ID item tidak ada.')

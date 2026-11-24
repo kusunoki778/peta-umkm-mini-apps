@@ -41,7 +41,9 @@ const emptyMessage = computed(() => {
       class="mt-8 rounded-lg border border-danger bg-danger/10 px-3 py-2 text-sm text-danger"
     >
       Daftar lapak gagal dimuat.
-      <button type="button" class="underline underline-offset-2" @click="refresh()">Coba lagi</button>
+      <button type="button" class="underline underline-offset-2" @click="refresh()">
+        Coba lagi
+      </button>
     </p>
 
     <ul v-else-if="businesses?.length" class="mt-8 space-y-3">
@@ -89,15 +91,14 @@ const emptyMessage = computed(() => {
       </li>
     </ul>
 
-    <div
-      v-else-if="status === 'pending'"
-      class="mt-8 space-y-3"
-      aria-hidden="true"
-    >
+    <div v-else-if="status === 'pending'" class="mt-8 space-y-3" aria-hidden="true">
       <div v-for="n in 2" :key="n" class="h-24 animate-pulse rounded-xl bg-border/40" />
     </div>
 
-    <div v-else class="mt-8 rounded-xl border border-dashed border-border bg-surface p-8 text-center">
+    <div
+      v-else
+      class="mt-8 rounded-xl border border-dashed border-border bg-surface p-8 text-center"
+    >
       <p class="font-medium text-ink">{{ emptyMessage }}</p>
       <p class="mt-1 text-sm text-muted">
         Mulai dengan menambahkan satu lapak: nama, kategori, alamat, dan titik lokasinya.

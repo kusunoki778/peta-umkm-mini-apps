@@ -2,16 +2,12 @@ import { z } from 'zod'
 
 const bodySchema = z.object({
   name: z.string().trim().min(2, 'Nama minimal 2 karakter.'),
-  email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .pipe(z.email('Format email tidak valid.')),
+  email: z.string().trim().toLowerCase().pipe(z.email('Format email tidak valid.')),
   phone: z.string().trim().max(20, 'Nomor telepon maksimal 20 karakter.').optional(),
   password: z.string().min(8, 'Kata sandi minimal 8 karakter.'),
 })
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const parsed = bodySchema.safeParse(await readBody(event))
   if (!parsed.success) {
     throw fail(422, parsed.error.issues[0]?.message ?? 'Data pendaftaran tidak valid.')

@@ -20,12 +20,12 @@ export interface PetaLapak {
   longitude: number | null
   distanceMeters: number | null
   isBoosted: boolean
-  category: { slug: string, name: string, color: string }
+  category: { slug: string; name: string; color: string }
 }
 
 const props = defineProps<{
   items: PetaLapak[]
-  pusat: { lat: number, lng: number }
+  pusat: { lat: number; lng: number }
   terpilih: string | null
   tampilkanLokasiSaya?: boolean
 }>()
@@ -66,7 +66,7 @@ function gambarUlang() {
     spiderfyOnMaxZoom: true,
     disableClusteringAtZoom: 18,
     maxClusterRadius: 46,
-    iconCreateFunction: (grup) => {
+    iconCreateFunction: grup => {
       const jumlah = grup.getChildCount()
       return L.divIcon({
         className: 'lapak-cluster-bungkus',
@@ -117,36 +117,45 @@ onMounted(() => {
 
 watch(() => props.items, gambarUlang, { deep: true })
 
-watch(() => props.pusat, (pusat) => {
-  peta?.setView([pusat.lat, pusat.lng])
-})
+watch(
+  () => props.pusat,
+  pusat => {
+    peta?.setView([pusat.lat, pusat.lng])
+  },
+)
 
 // Menyorot lapak yang sedang dipilih di panel daftar.
-watch(() => props.terpilih, (slug) => {
-  if (!peta || !slug) return
-  const marker = penanda.get(slug)
-  if (!marker) return
-  const posisi = marker.getLatLng()
-  peta.setView(posisi, Math.max(peta.getZoom(), 16))
-  marker.setZIndexOffset(1000)
-})
+watch(
+  () => props.terpilih,
+  slug => {
+    if (!peta || !slug) return
+    const marker = penanda.get(slug)
+    if (!marker) return
+    const posisi = marker.getLatLng()
+    peta.setView(posisi, Math.max(peta.getZoom(), 16))
+    marker.setZIndexOffset(1000)
+  },
+)
 
-watch(() => props.tampilkanLokasiSaya, (aktif) => {
-  if (!peta || !aktif) {
-    if (penandaLokasiSaya) {
-      penandaLokasiSaya.remove()
-      penandaLokasiSaya = null
+watch(
+  () => props.tampilkanLokasiSaya,
+  aktif => {
+    if (!peta || !aktif) {
+      if (penandaLokasiSaya) {
+        penandaLokasiSaya.remove()
+        penandaLokasiSaya = null
+      }
+      return
     }
-    return
-  }
-  penandaLokasiSaya = L.circleMarker([props.pusat.lat, props.pusat.lng], {
-    radius: 7,
-    color: '#0f6b4f',
-    weight: 3,
-    fillColor: '#f7f4ef',
-    fillOpacity: 1,
-  }).addTo(peta)
-})
+    penandaLokasiSaya = L.circleMarker([props.pusat.lat, props.pusat.lng], {
+      radius: 7,
+      color: '#0f6b4f',
+      weight: 3,
+      fillColor: '#f7f4ef',
+      fillOpacity: 1,
+    }).addTo(peta)
+  },
+)
 
 onBeforeUnmount(() => {
   peta?.remove()

@@ -10,7 +10,7 @@ Daftar tugas dikelompokkan per fase. Tanda centang menandai pekerjaan yang sudah
 - [x] Aktifkan ekstensi geospasial di basis data (PostGIS tidak tersedia di mesin dev, dipakai `cube` + `earthdistance` dengan indeks GiST; PostGIS tetap jalur produksi)
 - [x] Buat `.env.example` dan sambungkan kunci yang dibutuhkan
 - [x] Siapkan ESLint
-- [ ] Siapkan Prettier
+- [x] Siapkan Prettier (`.prettierrc.json`, `npm run format`, `npm run format:check`; aturan `vue/html-self-closing` diselaraskan supaya tidak bertabrakan dengan Prettier)
 - [x] Inisialisasi Git dan sambungkan ke repositori (push menunggu repo GitHub dibuat)
 - [x] Tulis skrip seed untuk lapak contoh
 
@@ -18,14 +18,14 @@ Estimasi: 1 hari.
 
 ## Fase 1 - Fondasi
 
-- [ ] Layout dasar (header, peta, panel daftar) untuk desktop dan mobile
-- [ ] Komponen dasar: Button, Chip, Sheet, EmptyState, LoadingSkeleton, Toast
-- [ ] Tema terang dan gelap dengan pengalih yang benar-benar bekerja
+- [x] Layout dasar (header, peta, panel daftar) untuk desktop dan mobile
+- [ ] Komponen dasar: Button, Chip, Sheet, EmptyState, LoadingSkeleton, Toast (baru ada `AppField`, `ChipKategori`, `KartuLapak`, `PetaLapak`, `PemilihTitik`, `UnggahFoto`; Toast dan Sheet belum)
+- [x] Tema terang dan gelap dengan pengalih yang benar-benar bekerja (tombol di header, pilihan disimpan di localStorage, skrip awal mencegah kedip, mengikuti `prefers-color-scheme` bila belum ada pilihan)
 - [x] Skema Prisma untuk users, categories, businesses, dan tabel pendukung
 - [x] Migrasi pertama dan jalankan seed
 - [x] Registrasi, login, logout, dan sesi
 - [x] Middleware peran (pemilik dan admin)
-- [ ] Halaman 403 dan 404
+- [x] Halaman 403 dan 404 (`app/error.vue` menangani 404 dan error lain; 403 muncul sebagai pesan di halaman terkait)
 
 Estimasi: 3 sampai 4 hari.
 
@@ -33,8 +33,8 @@ Estimasi: 3 sampai 4 hari.
 
 - [x] Endpoint daftar, detail, tambah, ubah, dan hapus lapak
 - [x] Validasi input memakai Zod
-- [ ] Form tambah lapak dengan pemilih titik di peta (sementara masih input lintang dan bujur manual plus tombol "Pakai lokasi saya sekarang"; pemilih titik di peta menyusul bersama komponen peta di Fase 3)
-- [ ] Unggah foto dengan validasi dan pengecilan ukuran
+- [x] Form tambah lapak dengan pemilih titik di peta (klik peta mengisi lintang dan bujur, kolomnya tetap bisa diedit manual, plus tombol "Cari lokasi di peta" memakai Nominatim dan "Pakai lokasi saya sekarang")
+- [x] Unggah foto dengan validasi dan pengecilan ukuran (maksimal 6 foto, JPG/PNG/WebP, maksimal 5 MB, diperkecil ke tiga ukuran WebP 480/960/1440 px, jenis berkas diperiksa dari isinya bukan dari nama)
 - [x] Pengelolaan item menu atau layanan
 - [x] Pengaturan jam buka
 - [x] Dashboard pemilik: daftar lapak, status verifikasi, aksi
@@ -89,16 +89,16 @@ Estimasi: 3 hari.
 
 ## Fase 6 - Penyelesaian dan Portofolio
 
-- [ ] Audit aksesibilitas: kontras, keyboard, `prefers-reduced-motion`
-- [ ] Audit keadaan: loading, empty, error di semua halaman
-- [ ] SEO halaman detail lapak
-- [ ] Pengukuran dan penyetelan performa peta
-- [ ] Cek responsif di semua breakpoint
+- [ ] Audit aksesibilitas menyeluruh: kontras seluruh halaman, urutan tab, `prefers-reduced-motion` pada semua animasi (sebagian sudah: indikator fokus, label `aria`, `role="alert"`, animasi marker berhenti saat reduced motion)
+- [ ] Audit keadaan menyeluruh: skeleton, kosong, dan error di semua halaman (halaman peta, kelola, boost, dan admin sudah punya ketiganya; halaman masuk dan daftar belum)
+- [x] SEO halaman detail lapak (judul, deskripsi, canonical, Open Graph, Twitter card, dan data terstruktur `LocalBusiness` dengan koordinat)
+- [ ] Pengukuran dan penyetelan performa peta (clustering dan `srcset` foto sudah ada, belum ada pengukuran nyata)
+- [ ] Cek responsif di semua breakpoint pada perangkat sungguhan
 - [ ] Deployment dan basis data produksi dengan PostGIS
-- [ ] Isi README dengan tangkapan layar nyata dan penjelasan arsitektur
+- [ ] Isi README dengan tangkapan layar nyata (penjelasan arsitektur dan akun contoh sudah ada)
 - [ ] Tulis catatan studi kasus: masalah, keputusan, hasil
-- [ ] Siapkan akun demo untuk meninjau portofolio
-- [ ] Bersihkan kode dan hapus data uji yang tidak perlu
+- [x] Siapkan akun demo untuk meninjau portofolio (tercatat di README; belum ada deployment publik)
+- [x] Bersihkan kode dan hapus data uji yang tidak perlu (`scripts/bersih-foto.mjs`, Prettier, aturan lint, data uji dikembalikan ke keadaan seed)
 
 Estimasi: 2 sampai 3 hari.
 
