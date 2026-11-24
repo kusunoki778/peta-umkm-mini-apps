@@ -1,48 +1,45 @@
-import { verifyMidtransSignature } from '../../utils/midtrans'
-import { prisma } from '../../utils/prisma'
+import { verifikasiTandaTangan } from '../../utils/miomipay'
+import { terapkanStatusPembayaran } from '../../utils/pembayaran'
 
+/**
+ * Webhook MiomiPay. Bukan jalur utama, karena aplikasi di localhost tidak bisa
+ * dijangkau dari internet. Tetap disediakan supaya deployment sungguhan bisa
+ * mengaktifkan boost tanpa menunggu pembeli membuka halaman lagi.
+ *
+ * Tanda tangan dihitung dari isi mentah request, bukan dari hasil parse JSON.
+ * Urutan kunci dan spasi bisa berubah saat di-parse ulang, dan itu akan membuat
+ * tanda tangan yang sebenarnya valid terlihat palsu.
+ */
 export default defineEventHandler(async event => {
-  const body = await readBody<Record<string, string>>(event)
-  const grossAmount = String(body.gross_amount ?? '')
-  const signatureValid =
-    body.order_id && body.status_code && body.signature_key
-      ? verifyMidtransSignature(body.order_id, body.status_code, grossAmount, body.signature_key)
-      : false
-  if (!signatureValid) {
-    throw createError({ statusCode: 401, statusMessage: 'Signature pembayaran tidak valid.' })
+  const isiMentah = await readRawBody(event, 'utf8')
+  const tandaTangan = getHeader(event, 'x-miomipay-signature') ?? ''
+  if (!isiMentah || !verifikasiTandaTangan(isiMentah, tandaTangan)) {
+    throw createError({ statusCode: 401, statusMessage: 'Tanda tangan webhook tidak valid.' })
   }
-  const payment = await prisma.payment.findUnique({
-    where: { orderId: body.order_id },
-    include: { boost: { include: { package: true } } },
+
+  let body: {
+    event?: string
+    data?: { reference?: string; external_id?: string; status?: string; paid_at?: string | null }
+  }
+  try {
+    body = JSON.parse(isiMentah)
+  } catch {
+    throw createError({ statusCode: 400, statusMessage: 'Isi webhook bukan JSON.' })
+  }
+
+  const orderId = body.data?.external_id
+  if (!orderId) throw createError({ statusCode: 422, statusMessage: 'Webhook tanpa external_id.' })
+
+  const status = String(body.data?.status ?? '').toUpperCase()
+  const hasil = await terapkanStatusPembayaran({
+    orderId,
+    lunas: ['PAID', 'SETTLEMENT', 'SUCCESS'].includes(status),
+    gagal: ['EXPIRED', 'FAILED', 'CANCELLED', 'CANCEL'].includes(status),
+    paidAt: body.data?.paid_at ? new Date(body.data.paid_at) : null,
+    statusMentah: body,
   })
-  if (!payment) throw createError({ statusCode: 404, statusMessage: 'Order tidak ditemukan.' })
-  const transactionStatus = body.transaction_status ?? ''
-  const settled = transactionStatus === 'settlement' || transactionStatus === 'capture'
-  const failed = ['deny', 'cancel', 'expire'].includes(transactionStatus)
-  if (settled && payment.status !== 'settled') {
-    const now = new Date()
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: 'settled', method: body.payment_type, paidAt: now, rawResponse: body },
-      }),
-      prisma.boost.update({
-        where: { id: payment.boostId },
-        data: {
-          status: 'active',
-          startsAt: now,
-          endsAt: new Date(now.getTime() + payment.boost.package.durationDays * 86400000),
-        },
-      }),
-    ])
-  } else if (failed && payment.status === 'pending') {
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: transactionStatus === 'expire' ? 'expired' : 'failed', rawResponse: body },
-      }),
-      prisma.boost.update({ where: { id: payment.boostId }, data: { status: 'failed' } }),
-    ])
-  }
-  return { ok: true }
+
+  // Pesanan yang tidak dikenal tetap dijawab 200 supaya MiomiPay berhenti
+  // mencoba ulang. Isinya dicatat lewat status agar mudah dilacak.
+  return { ok: true, ditemukan: hasil.ditemukan, berubah: hasil.berubah }
 })

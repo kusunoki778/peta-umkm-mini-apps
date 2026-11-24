@@ -5,11 +5,16 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxt/fonts', '@nuxt/eslint', 'nuxt-auth-utils'],
   runtimeConfig: {
-    // Kunci ini dibaca Nitro dari env dengan nama NUXT_MIDTRANS_SERVER_KEY.
-    // Nilai di bawah hanya cadangan saat env tidak ada, dan sengaja memakai
-    // process.env supaya nama lama (MIDTRANS_SERVER_KEY) tetap terbaca.
-    midtransServerKey:
-      process.env.NUXT_MIDTRANS_SERVER_KEY ?? process.env.MIDTRANS_SERVER_KEY ?? '',
+    // Kunci MiomiPay hanya dipakai di server, jadi tidak pernah ikut ke bundel
+    // klien. Nilai di bawah dibaca dari env dengan nama lama (MIOMIPAY_*) supaya
+    // .env yang sudah ada tetap terbaca tanpa diubah.
+    miomipayApiKey: process.env.NUXT_MIOMIPAY_API_KEY ?? process.env.MIOMIPAY_SANDBOX_KEY ?? '',
+    miomipayWebhookSecret:
+      process.env.NUXT_MIOMIPAY_WEBHOOK_SECRET ?? process.env.MIOMIPAY_WEBHOOK_SECRET ?? '',
+    miomipayBaseUrl:
+      process.env.NUXT_MIOMIPAY_BASE_URL ??
+      process.env.MIOMIPAY_BASE_URL ??
+      'https://pg.miomidev.com/api/v1',
     // nuxt-auth-utils menyetel cookie sesi `Secure` secara bawaan. Saat pratinjau
     // build produksi di mesin lokal, aplikasi disajikan lewat http, jadi cookie
     // itu ditolak browser dan pengguna tidak pernah benar-benar masuk.
@@ -21,8 +26,8 @@ export default defineNuxtConfig({
       },
     },
     public: {
-      midtransClientKey: process.env.NUXT_PUBLIC_MIDTRANS_CLIENT_KEY ?? '',
-      midtransIsProduction: process.env.NUXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true',
+      // Tidak ada kunci pembayaran di sini. Semua permintaan ke MiomiPay
+      // dilakukan dari server supaya kunci API tidak bisa dibaca pengunjung.
     },
   },
   css: ['~/assets/css/main.css'],

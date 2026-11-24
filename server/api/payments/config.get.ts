@@ -1,17 +1,18 @@
-/** Cek konfigurasi Midtrans tanpa membocorkan secret. Dipakai halaman boost untuk
- *  menampilkan pesan yang jelas kalau kunci belum diisi. */
+import { pembayaranSiap } from '../../utils/miomipay'
+
+/**
+ * Cek konfigurasi pembayaran tanpa membocorkan kunci. Halaman boost memakainya
+ * untuk menampilkan pesan yang jelas kalau kunci belum diisi.
+ */
 export default defineEventHandler(() => {
   const config = useRuntimeConfig()
-  const serverKey = String(config.midtransServerKey ?? '')
-  const clientKey = String(config.public.midtransClientKey ?? '')
+  const apiKey = String(config.miomipayApiKey ?? '')
   return {
-    serverKeySet: serverKey.length > 0,
-    clientKeySet: clientKey.length > 0,
-    serverKeySandbox: serverKey.startsWith('SB-Mid-server-'),
-    clientKeySandbox: clientKey.startsWith('SB-Mid-client-'),
-    isProduction: Boolean(config.public.midtransIsProduction),
-    snapScriptUrl: config.public.midtransIsProduction
-      ? 'https://app.midtrans.com/snap/snap.js'
-      : 'https://app.sandbox.midtrans.com/snap/snap.js',
+    siap: pembayaranSiap(),
+    penyedia: 'MiomiPay',
+    kunciTerisi: apiKey.length > 0,
+    modeSandbox: apiKey.startsWith('MP-SB-'),
+    baseUrlTerisi: String(config.miomipayBaseUrl ?? '').length > 0,
+    webhookSecretTerisi: String(config.miomipayWebhookSecret ?? '').length > 0,
   }
 })

@@ -2,7 +2,7 @@
 
 Peta interaktif untuk menemukan tempat makan, kos, dan jasa di sekitar kampus. Pemilik usaha bisa mendaftarkan lapaknya, lalu membayar paket boost supaya lapaknya menonjol di peta dan muncul di atas daftar rekomendasi.
 
-Status proyek: **Fase 0 sampai 5 selesai, ditambah sebagian Fase 6**. Peta interaktif, pencarian, filter kategori, CRUD lapak, unggah foto, boost berbayar lewat Midtrans Snap, webhook, panel admin, dan tema terang atau gelap sudah berjalan. Belum ada: deployment, tangkapan layar, studi kasus, dan akun demo publik.
+Status proyek: **Fase 0 sampai 5 selesai, ditambah sebagian Fase 6**. Peta interaktif, pencarian, filter kategori, CRUD lapak, unggah foto, boost berbayar lewat QRIS MiomiPay, panel admin, dan tema terang atau gelap sudah berjalan. Belum ada: deployment, tangkapan layar, studi kasus, dan akun demo publik.
 
 ## Masalah yang Dipecahkan
 
@@ -26,7 +26,7 @@ Pendatang seperti mahasiswa baru kesulitan menemukan tempat makan, kos, atau ben
 - PostgreSQL dengan `cube` + `earthdistance` (PostGIS disiapkan untuk produksi)
 - Prisma 7
 - Leaflet, OpenStreetMap, dan Nominatim
-- Midtrans Snap
+- MiomiPay (QRIS)
 - Sharp untuk pengecilan foto
 
 Alasan pemilihan tiap alat ada di [docs/05-tech-stack.md](docs/05-tech-stack.md).
@@ -44,8 +44,8 @@ Alasan pemilihan tiap alat ada di [docs/05-tech-stack.md](docs/05-tech-stack.md)
 ## Diagram Alur Boost
 
 ```
-Pemilik -> Pilih paket -> Server buat Snap token -> Midtrans Snap (bayar)
-      -> Webhook tervalidasi -> Boost aktif -> Marker emas + naik urutan
+Pemilik -> Pilih paket -> Server buat tagihan QRIS -> Bayar di MiomiPay
+      -> Halaman boost menanyakan status -> Boost aktif -> Marker emas + naik urutan
       -> Lewat tanggal berakhir -> Boost nonaktif
 ```
 
@@ -56,7 +56,7 @@ Butuh Node.js 20 atau lebih baru, dan PostgreSQL 14 atau lebih baru dengan ekste
 ```bash
 npm install
 cp .env.example .env        # Windows: copy .env.example .env
-# lalu isi DATABASE_URL, NUXT_APP_SECRET, dan kunci Midtrans di .env
+# lalu isi DATABASE_URL, NUXT_APP_SECRET, dan kunci MiomiPay di .env
 npm run db:generate         # generate Prisma Client
 npm run db:migrate          # buat tabel dan aktifkan ekstensi geospasial
 npm run db:seed             # isi data contoh (opsional)
@@ -66,18 +66,28 @@ npm run dev                 # buka http://localhost:3000
 Isi `.env` untuk pembayaran boost:
 
 ```
-MIDTRANS_SERVER_KEY=SB-Mid-server-...
-NUXT_PUBLIC_MIDTRANS_CLIENT_KEY=SB-Mid-client-...
-NUXT_PUBLIC_MIDTRANS_IS_PRODUCTION=false
+MIOMIPAY_SANDBOX_KEY=MP-SB-...
+MIOMIPAY_WEBHOOK_SECRET=whsec_...
+MIOMIPAY_BASE_URL=https://pg.miomidev.com/api/v1
+MIOMIPAY_ENV=sandbox
 ```
 
-Kunci sandbox diambil dari dashboard Midtrans. Izin yang dibutuhkan cukup **Snap Checkout: Write**. Bila kunci belum diisi, halaman boost menampilkan peringatan dan tidak mengirim permintaan ke Midtrans.
+Kunci diambil dari dashboard MiomiPay setelah mendaftar gratis di `https://pg.miomidev.com/register`. Bila kunci belum diisi, halaman boost menampilkan peringatan dan tidak mengirim permintaan ke MiomiPay.
 
 Skrip lain: `npm run build`, `npm run lint`, `npm run format`, `npm run format:check`, `npm run typecheck`, `npm run db:studio`.
 
 Foto lapak disimpan di `public/uploads` dan tidak masuk Git. Folder itu dibuat otomatis saat unggahan pertama. Karena `public` hanya disalin ke build sekali, ada rute `server/routes/uploads/[nama].get.ts` yang menyajikan berkas langsung dari disk.
 
-Untuk menerima webhook pembayaran di mesin lokal, jalankan `ngrok http 3000` lalu isi Payment Notification URL di dashboard Midtrans dengan `https://<url-ngrok>/api/payments/notification`.
+### Menguji pembayaran tanpa ngrok
+
+Boost aktif karena aplikasi **menanyakan status ke MiomiPay**, bukan menunggu webhook masuk. Permintaan itu keluar dari server ke internet, jadi berjalan di `localhost` tanpa tunnel.
+
+1. Buka halaman boost sebuah lapak, pilih paket, tekan "Buat tagihan QRIS".
+2. Salin tautan "Buka halaman pembayaran", atau salin nomor tagihan `MP-INV-...`.
+3. Buka `https://pg.miomidev.com/sandbox/simulator`, tempel tautan atau nomor itu, lalu tekan "Bayar Sekarang".
+4. Halaman boost menandai pembayaran dalam 5 detik, boost aktif, marker berubah emas.
+
+Webhook `POST /api/payments/notification` tetap tersedia sebagai jalur cadangan untuk deployment yang punya alamat publik. Verifikasinya memakai HMAC-SHA256 dari isi mentah request dibandingkan header `X-MiomiPay-Signature`, dan baru berguna setelah aplikasi bisa dijangkau dari internet.
 
 ## Akun Contoh dari Seed
 
@@ -95,14 +105,16 @@ Skrip uji menjalankan permintaan HTTP sungguhan terhadap build produksi di port 
 ```bash
 npm run build
 PORT=3111 node .output/server/index.mjs
-node scripts/uji-regresi.mjs     # 42 pemeriksaan alur utama
+node scripts/uji-regresi.mjs     # 48 pemeriksaan alur utama
 node scripts/uji-foto.mjs        # 36 pemeriksaan unggah foto
 node scripts/uji-tema-seo.mjs    # 10 pemeriksaan tema dan SEO
-node scripts/uji-webhook.mjs     # tanda tangan webhook dan idempotensi
+node scripts/uji-miomipay.mjs    # 27 pemeriksaan pembayaran sampai boost aktif
 node scripts/uji-admin.mjs       # pembatasan akses admin
 ```
 
-`scripts/uji-foto.mjs` dan `scripts/uji-regresi.mjs` mengubah data, jadi jalankan pada basis data pengembangan. `scripts/bersih-foto.mjs` mengembalikan foto dan lapak buatan uji ke keadaan seed.
+`scripts/uji-miomipay.mjs` membuat tagihan sungguhan di sandbox MiomiPay, menandainya lunas lewat simulator, lalu memastikan boost aktif, idempoten, dan menolak pembelian kedua. Skrip itu butuh `MIOMIPAY_WEBHOOK_SECRET` di `.env`.
+
+`scripts/uji-foto.mjs`, `scripts/uji-regresi.mjs`, dan `scripts/uji-miomipay.mjs` mengubah data, jadi jalankan pada basis data pengembangan. `scripts/bersih-foto.mjs` dan `scripts/bersih-pembayaran.mjs` mengembalikan data ke keadaan seed.
 
 ## Rencana Selanjutnya
 

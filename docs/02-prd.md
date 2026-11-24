@@ -51,7 +51,7 @@ Persona di bawah adalah asumsi desain untuk memandu keputusan, bukan orang nyata
 - Peta menampilkan semua lapak dengan filter kategori.
 - Pencarian nama lapak dan pencarian "di sekitar saya".
 - Halaman detail lapak.
-- Boost lapak: pilih paket, bayar lewat Midtrans, marker berubah emas dan naik ke atas daftar.
+- Boost lapak: pilih paket, bayar lewat QRIS MiomiPay, marker berubah emas dan naik ke atas daftar.
 - Verifikasi lapak baru oleh admin.
 
 ### v1 (segera setelah MVP)
@@ -140,7 +140,7 @@ Persona di bawah adalah asumsi desain untuk memandu keputusan, bukan orang nyata
 
 **US-14. Membeli boost.** Sebagai pemilik, saya ingin membeli paket boost.
 
-- Diterima bila: tersedia beberapa paket dengan durasi berbeda, dan pembayaran memakai Midtrans Snap.
+- Diterima bila: tersedia beberapa paket dengan durasi berbeda, dan pembayaran memakai QRIS MiomiPay.
 
 **US-15. Boost aktif.** Sebagai pemilik, saya ingin lapak saya menonjol setelah membayar.
 
@@ -190,7 +190,7 @@ Persona di bawah adalah asumsi desain untuk memandu keputusan, bukan orang nyata
 ### Boost
 
 - Paket boost (durasi dan harga).
-- Pembuatan transaksi dan Snap token.
+- Pembuatan tagihan QRIS dan nomor referensinya.
 - Webhook pembayaran dan aktivasi boost.
 - Urutan daftar: boost aktif lebih dulu, lalu jarak atau relevansi.
 
@@ -208,7 +208,7 @@ Persona di bawah adalah asumsi desain untuk memandu keputusan, bukan orang nyata
 | Keamanan       | Kata sandi di-hash, kunci server tidak pernah dikirim ke klien, webhook diverifikasi tanda tangannya, akses data dibatasi per pemilik. |
 | Aksesibilitas  | Kontras WCAG AA, target sentuh 44px, bisa dioperasikan keyboard melalui panel daftar, hormati `prefers-reduced-motion`.                |
 | SEO            | Halaman detail lapak bisa di-render di server dan punya judul serta deskripsi.                                                         |
-| Biaya          | Memakai layanan gratis untuk pengembangan: tile OpenStreetMap, Midtrans sandbox, basis data lokal.                                     |
+| Biaya          | Memakai layanan gratis untuk pengembangan: tile OpenStreetMap, MiomiPay sandbox, basis data lokal.                                     |
 | Ketahanan data | Penghapusan lunak, cadangan basis data, migrasi tersimpan di repositori.                                                               |
 
 ## 9. Model Monetisasi (Paid Promote)
@@ -236,14 +236,14 @@ Harga di atas contoh dari brief dan gampang diubah di basis data. Aturan paket d
 ### Alur boost
 
 1. Pemilik membuka lapaknya, memilih "Boost Lapak Ini".
-2. Pilih paket. Server membuat transaksi dan Snap token.
-3. Pembayaran diproses di Midtrans Snap.
-4. Midtrans mengirim webhook. Server memverifikasi tanda tangan.
-5. Boost diaktifkan dengan tanggal berakhir. Marker berubah emas dan urutan daftar berubah.
+2. Pilih paket. Server membuat tagihan QRIS dan menyimpan nomor referensinya.
+3. Pembeli memindai QRIS atau membuka halaman pembayaran MiomiPay.
+4. Halaman boost menanyakan status pembayaran tiap 5 detik. Server meneruskannya ke MiomiPay, lalu memverifikasi hasilnya di sisi server.
+5. Setelah lunas, boost diaktifkan dengan tanggal berakhir. Marker berubah emas dan urutan daftar berubah.
 6. Saat tanggal berakhir, boost berhenti otomatis.
 
 ```
-Pemilik -> Pilih paket -> Server buat Snap token -> Midtrans Snap (bayar)
+Pemilik -> Pilih paket -> Server buat tagihan QRIS -> Bayar di MiomiPay
       -> Webhook tervalidasi -> Boost aktif -> Marker emas + naik urutan
       -> Lewat tanggal berakhir -> Boost nonaktif
 ```
@@ -261,13 +261,13 @@ Angka batasnya ditetapkan setelah pengukuran pertama, bukan dikarang sekarang.
 
 ## 12. Risiko dan Asumsi
 
-| Risiko atau asumsi                      | Penanganan                                                                                            |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| PostGIS belum aktif di basis data       | Sediakan skrip migrasi untuk mengaktifkan ekstensi; sediakan fallback perhitungan jarak sederhana.    |
-| Kuota atau kebijakan tile OpenStreetMap | Siapkan penyedia tile cadangan dan atur atribusi dengan benar.                                        |
-| Webhook tidak sampai                    | Sediakan pengecekan status transaksi ke Midtrans sebagai cadangan, dan proses ulang secara idempoten. |
-| Akurasi titik lokasi                    | Pemilik menggeser pin manual; pengguna melihat jarak sebagai perkiraan.                               |
-| Data awal kosong saat demo              | Sediakan skrip seed lapak contoh untuk keperluan demo.                                                |
+| Risiko atau asumsi                      | Penanganan                                                                                                          |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| PostGIS belum aktif di basis data       | Sediakan skrip migrasi untuk mengaktifkan ekstensi; sediakan fallback perhitungan jarak sederhana.                  |
+| Kuota atau kebijakan tile OpenStreetMap | Siapkan penyedia tile cadangan dan atur atribusi dengan benar.                                                      |
+| Webhook tidak sampai                    | Status ditanyakan langsung ke MiomiPay (polling), jadi aktivasi tidak bergantung pada webhook. Prosesnya idempoten. |
+| Akurasi titik lokasi                    | Pemilik menggeser pin manual; pengguna melihat jarak sebagai perkiraan.                                             |
+| Data awal kosong saat demo              | Sediakan skrip seed lapak contoh untuk keperluan demo.                                                              |
 
 ## 13. Aturan Bisnis
 

@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { prisma } from '../../utils/prisma'
 import { requireAuth } from '../../utils/auth'
 import { requireOwnedBusiness } from '../../utils/business'
-import { createSnapToken } from '../../utils/midtrans'
+import { buatTagihan } from '../../utils/miomipay'
 import { fail } from '../../utils/errors'
 
 export default defineEventHandler(async event => {
@@ -16,21 +16,43 @@ export default defineEventHandler(async event => {
     where: { businessId: business.id, status: 'active', endsAt: { gt: new Date() } },
   })
   if (existing) return fail(409, 'Lapak ini masih memiliki boost aktif.')
+
   const orderId = `boost-${randomUUID()}`
   const boost = await prisma.boost.create({ data: { businessId: business.id, packageId: pack.id } })
   const payment = await prisma.payment.create({
     data: { orderId, boostId: boost.id, amount: pack.price },
   })
+
   try {
-    const snapToken = await createSnapToken({ orderId, amount: pack.price, customer: user })
-    await prisma.payment.update({ where: { id: payment.id }, data: { snapToken } })
-    return { orderId, snapToken, amount: pack.price }
+    const tagihan = await buatTagihan({
+      orderId,
+      amount: pack.price,
+      description: `Boost ${pack.name} untuk ${business.name}`,
+      customer: user,
+    })
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        providerRef: tagihan.reference,
+        checkoutUrl: tagihan.checkoutUrl,
+        qrImageUrl: tagihan.qrImageUrl,
+        rawResponse: { pembuatan: tagihan },
+      },
+    })
+    return {
+      orderId,
+      amount: pack.price,
+      checkoutUrl: tagihan.checkoutUrl,
+      qrImageUrl: tagihan.qrImageUrl,
+      reference: tagihan.reference,
+      expiresAt: tagihan.expiresAt,
+    }
   } catch (error) {
     await prisma.$transaction([
       prisma.payment.update({ where: { id: payment.id }, data: { status: 'failed' } }),
       prisma.boost.update({ where: { id: boost.id }, data: { status: 'failed' } }),
     ])
-    // Teruskan pesan asli dari utils/midtrans supaya UI bisa menampilkan sebabnya.
+    // Pesan dari utils/miomipay sudah berbahasa Indonesia dan menyebut sebabnya.
     const detail =
       (error as { data?: { message?: string } })?.data?.message ??
       (error as { statusMessage?: string })?.statusMessage ??

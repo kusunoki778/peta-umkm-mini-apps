@@ -16,12 +16,12 @@ Aplikasi satu repo dengan Nuxt 4. UI berjalan di browser, logika server (API, we
 |  - server/api/*  (endpoint REST)                            |
 |  - Autentikasi peran, validasi input                        |
 |  - Akses basis data lewat Prisma                            |
-|  - Webhook Midtrans                                         |
+|  - Polling status pembayaran dan webhook cadangan             |
 +--------+------------------------------+---------------------+
          |                              |
          v                              v
 +-------------------+          +---------------------------+
-| PostgreSQL        |          | Midtrans (Snap + Core)    |
+| PostgreSQL        |          | MiomiPay (QRIS)           |
 | + PostGIS         |          | sandbox / produksi        |
 +-------------------+          +---------------------------+
          ^
@@ -42,7 +42,7 @@ Aplikasi satu repo dengan Nuxt 4. UI berjalan di browser, logika server (API, we
 | Basis data  | PostgreSQL + PostGIS                                      | PostGIS menangani pencarian radius dan pengurutan jarak dengan benar.                                                            |
 | ORM         | Prisma                                                    | Umum dipakai, migrasi jelas; query geospasial dilakukan lewat SQL mentah. Alternatif: Drizzle (dukungan PostGIS lebih langsung). |
 | Autentikasi | nuxt-auth-utils (cookie sesi) atau sidebase/nuxt-auth     | nuxt-auth-utils ringan dan cukup untuk kredensial dan peran. Alternatif: Auth.js bila butuh penyedia login sosial.               |
-| Pembayaran  | Midtrans Snap                                             | Sesuai kebutuhan pembayaran lokal, sudah dipakai di proyek pelatihan.                                                            |
+| Pembayaran  | MiomiPay (QRIS)                                           | Midtrans                                                                                                                         | Satu-satunya yang menyediakan simulator sandbox yang bisa menandai tagihan lunas dari localhost tanpa tunnel. |
 | Validasi    | Zod                                                       | Validasi skema di server dan di klien dari satu sumber.                                                                          |
 | Unggah foto | Lokal saat pengembangan, S3 atau Cloudinary saat produksi | Sederhana saat mulai, bisa naik ke penyimpanan objek.                                                                            |
 
@@ -133,17 +133,17 @@ reports (n) >---- businesses            (v1)
 
 ### Tabel utama
 
-| Tabel            | Kolom kunci                                                                                                                                                                           | Catatan                                                     |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `users`          | id, name, email (unik), password_hash, role (`owner` atau `admin`), created_at                                                                                                        | Kata sandi di-hash.                                         |
-| `businesses`     | id, owner_id, name, slug, category_id, description, address, location `geography(Point,4326)`, status (`pending`, `live`, `rejected`, `inactive`), created_at, updated_at, deleted_at | `location` memakai PostGIS. `deleted_at` untuk hapus lunak. |
-| `photos`         | id, business_id, url, sort_order                                                                                                                                                      |                                                             |
-| `items`          | id, business_id, name, price, sort_order                                                                                                                                              | Menu atau layanan.                                          |
-| `opening_hours`  | id, business_id, day (0 sampai 6), open_time, close_time, is_closed                                                                                                                   |                                                             |
-| `categories`     | id, name, slug, color, icon                                                                                                                                                           | Warna mengikuti palet kategori di dokumen desain.           |
-| `boost_packages` | id, name, duration_days, price                                                                                                                                                        | Data, bukan kode.                                           |
-| `boosts`         | id, business_id, package_id, user_id, starts_at, ends_at, status (`pending`, `active`, `expired`, `failed`)                                                                           | Satu boost aktif per lapak.                                 |
-| `payments`       | id, boost_id, order_id (unik), gross_amount, status (`pending`, `settlement`, `expire`, `deny`, `cancel`), payment_type, raw_response (JSONB), created_at                             | `order_id` untuk Midtrans.                                  |
+| Tabel            | Kolom kunci                                                                                                                                                                                                             | Catatan                                                     |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `users`          | id, name, email (unik), password_hash, role (`owner` atau `admin`), created_at                                                                                                                                          | Kata sandi di-hash.                                         |
+| `businesses`     | id, owner_id, name, slug, category_id, description, address, location `geography(Point,4326)`, status (`pending`, `live`, `rejected`, `inactive`), created_at, updated_at, deleted_at                                   | `location` memakai PostGIS. `deleted_at` untuk hapus lunak. |
+| `photos`         | id, business_id, url, sort_order                                                                                                                                                                                        |                                                             |
+| `items`          | id, business_id, name, price, sort_order                                                                                                                                                                                | Menu atau layanan.                                          |
+| `opening_hours`  | id, business_id, day (0 sampai 6), open_time, close_time, is_closed                                                                                                                                                     |                                                             |
+| `categories`     | id, name, slug, color, icon                                                                                                                                                                                             | Warna mengikuti palet kategori di dokumen desain.           |
+| `boost_packages` | id, name, duration_days, price                                                                                                                                                                                          | Data, bukan kode.                                           |
+| `boosts`         | id, business_id, package_id, user_id, starts_at, ends_at, status (`pending`, `active`, `expired`, `failed`)                                                                                                             | Satu boost aktif per lapak.                                 |
+| `payments`       | id, boost_id, order_id (unik), amount, status (`pending`, `settled`, `expired`, `failed`, `refunded`), method, provider_ref (referensi MiomiPay), checkout_url, qr_image_url, raw_response (JSONB), paid_at, created_at | `order_id` dipakai sebagai `external_id` ke MiomiPay.       |
 
 ### Indeks penting
 
@@ -209,9 +209,10 @@ Endpoint REST lewat `server/api`. Semua respons JSON. Validasi input dengan Zod.
 | DELETE | `/api/photos/:photoId`             | pemilik pemiliknya            | Hapus foto beserta berkasnya.                                         |
 | GET    | `/api/categories`                  | publik                        | Daftar kategori.                                                      |
 | GET    | `/api/boost-packages`              | publik                        | Daftar paket boost.                                                   |
-| POST   | `/api/boosts`                      | pemilik                       | Buat transaksi boost dan Snap token.                                  |
-| GET    | `/api/payments/config`             | publik                        | Status kesiapan kunci Midtrans (tanpa membocorkan nilainya).          |
-| POST   | `/api/payments/notification`       | Midtrans                      | Webhook pembayaran. Verifikasi tanda tangan.                          |
+| POST   | `/api/boosts`                      | pemilik                       | Buat tagihan QRIS MiomiPay.                                           |
+| GET    | `/api/payments/config`             | publik                        | Status kesiapan kunci MiomiPay (tanpa membocorkan nilainya).          |
+| GET    | `/api/payments/:orderId/status`    | pemilik pemiliknya            | Tanya status ke MiomiPay, aktifkan boost bila lunas.                  |
+| POST   | `/api/payments/notification`       | MiomiPay                      | Webhook cadangan. Verifikasi HMAC-SHA256.                             |
 | GET    | `/api/boosts/mine`                 | pemilik                       | Riwayat boost saya.                                                   |
 | GET    | `/api/admin/businesses`            | admin                         | Daftar lapak untuk moderasi.                                          |
 | PATCH  | `/api/admin/businesses/:id/status` | admin                         | Setujui, tolak, atau nonaktifkan.                                     |
@@ -250,20 +251,20 @@ Contoh bentuk respons daftar:
 - Pengelompokan marker memakai plugin markercluster; marker boost dikeluarkan dari cluster.
 - Pencarian di sekitar memakai `navigator.geolocation` dengan penanganan izin ditolak.
 
-## 9. Pembayaran (Midtrans)
+## 9. Pembayaran (MiomiPay)
 
 1. Pemilik memilih paket. Server membuat `order_id` unik dan menyimpan baris `payments` serta `boosts` berstatus `pending`.
-2. Server memanggil Snap untuk membuat token, lalu mengirim token ke klien. Endpoint yang benar adalah `POST /snap/v1/transactions` (`app.sandbox.midtrans.com` untuk uji, `app.midtrans.com` untuk produksi). Path `/snap/v1/token` tidak ada dan akan menjawab 404.
-3. Klien memanggil `snap.pay(token)`.
-4. Midtrans mengirim webhook ke `/api/payments/notification`.
-5. Server memverifikasi tanda tangan: SHA-512 dari `order_id + status_code + gross_amount + server_key`.
-6. Bila status `settlement` atau `capture`, server mengaktifkan boost: `status = 'active'`, `starts_at = now`, `ends_at = now + duration_days`.
-7. Proses dibuat idempoten: `order_id` yang sama tidak mengaktifkan boost dua kali.
-8. Pengecekan status transaksi ke Midtrans disediakan sebagai cadangan bila webhook tidak sampai.
+2. Server memanggil `POST /api/v1/payment/create` di MiomiPay, lalu menyimpan `reference`, `checkout_url`, dan `qr_image_url` di baris `payments`.
+3. Halaman boost menampilkan gambar QRIS dan tautan halaman pembayaran MiomiPay.
+4. Halaman boost menanyakan status tiap 5 detik lewat `GET /api/payments/:orderId/status`. Server meneruskannya ke `GET /api/v1/payment/:reference/status` di MiomiPay.
+5. Bila status `PAID`, server mengaktifkan boost: `status = 'active'`, `starts_at = now`, `ends_at = now + duration_days`.
+6. Webhook `POST /api/payments/notification` tetap tersedia sebagai jalur cadangan untuk deployment yang punya alamat publik, dengan verifikasi HMAC-SHA256 dari isi mentah request dibandingkan header `X-MiomiPay-Signature`.
+7. Kedua jalur memakai satu fungsi yang sama, `terapkanStatusPembayaran` di `server/utils/pembayaran.ts`, sehingga tidak mungkin berperilaku berbeda.
+8. Proses dibuat idempoten: pemanggilan berulang tidak memperpanjang boost dan tidak mengaktifkannya dua kali.
 
-Kunci server hanya dipakai di server, tidak pernah dikirim ke klien. Kunci klien boleh dipakai di peramban untuk Snap.
+**Kenapa polling yang jadi jalur utama, bukan webhook.** Webhook adalah permintaan masuk ke aplikasi kita. Saat aplikasi berjalan di `localhost`, Midtrans maupun MiomiPay tidak bisa menjangkaunya, jadi aktivasi boost tidak akan pernah terjadi walaupun pembeli sudah membayar. Permintaan polling justru keluar dari server kita ke internet, sehingga cara itu bekerja tanpa tunnel, tanpa ngrok, dan tanpa VPS. Webhook baru berguna setelah aplikasi punya alamat publik.
 
-Izin Midtrans yang dibutuhkan untuk alur ini cukup satu: **Snap Checkout `Write`**. Izin Core API sengaja dibiarkan `None`, sehingga memanggil `GET /v2/<order_id>/status` akan dijawab `403 Access denied`. Karena itu pengecekan status cadangan pada poin 8 belum bisa dipakai selama izin itu belum dinyalakan; webhook menjadi jalur aktivasi boost yang sebenarnya. Halaman `/api/payments/config` mengembalikan status kesiapan kunci (terisi atau tidak, sandbox atau produksi) tanpa membocorkan nilainya, dan halaman boost memakainya untuk menampilkan peringatan yang jelas alih-alih gagal senyap.
+Kunci API hanya dipakai di server dan tidak pernah dikirim ke klien. Tidak ada kunci pembayaran di `runtimeConfig.public` sama sekali. Halaman `/api/payments/config` mengembalikan status kesiapan (kunci terisi, sandbox atau bukan, alamat API terisi, webhook secret terisi) tanpa membocorkan nilainya, dan halaman boost memakainya untuk menampilkan peringatan yang jelas alih-alih gagal senyap.
 
 Dua jebakan yang sudah ditemui dan harus dijaga:
 
@@ -326,19 +327,21 @@ Contoh variabel lingkungan (`.env.example`):
 
 ```
 DATABASE_URL="postgresql://user:pass@localhost:5432/lapak_peta"
-SESSION_SECRET="ganti-dengan-kunci-acak-panjang"
-MIDTRANS_SERVER_KEY="SB-Mid-server-xxxxx"
-MIDTRANS_CLIENT_KEY="SB-Mid-client-xxxxx"
-MIDTRANS_IS_PRODUCTION="false"
+NUXT_APP_SECRET="ganti-dengan-kunci-acak-panjang"
+MIOMIPAY_SANDBOX_KEY="MP-SB-xxxxx"
+MIOMIPAY_WEBHOOK_SECRET="whsec_xxxxx"
+MIOMIPAY_BASE_URL="https://pg.miomidev.com/api/v1"
+MIOMIPAY_ENV="sandbox"
 UPLOAD_DIR="public/uploads"
 ```
 
 ## 14. Keputusan Arsitektur
 
-| Keputusan                                         | Alasan                                                                                            |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Nuxt 4 satu proyek, bukan dua aplikasi            | Mengurangi kerumitan CORS dan deploy, dan satu bahasa untuk seluruh kode.                         |
-| PostGIS, bukan pencarian jarak di aplikasi        | Query radius dan urutan jarak lebih akurat dan cepat, serta menunjukkan kemampuan basis data.     |
-| Prisma dengan SQL mentah untuk geospasial         | Prisma memudahkan CRUD dan migrasi; query PostGIS yang tidak didukung ditulis sebagai SQL mentah. |
-| Gaya marker lewat `divIcon`                       | Membuat marker emas dan denyut boost bisa ditata dengan CSS yang sama seperti komponen lain.      |
-| Pembayaran lewat webhook sebagai sumber kebenaran | Status pembayaran tidak boleh ditentukan dari sisi klien saja.                                    |
+| Keputusan                                   | Alasan                                                                                                       |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Nuxt 4 satu proyek, bukan dua aplikasi      | Mengurangi kerumitan CORS dan deploy, dan satu bahasa untuk seluruh kode.                                    |
+| PostGIS, bukan pencarian jarak di aplikasi  | Query radius dan urutan jarak lebih akurat dan cepat, serta menunjukkan kemampuan basis data.                |
+| Prisma dengan SQL mentah untuk geospasial   | Prisma memudahkan CRUD dan migrasi; query PostGIS yang tidak didukung ditulis sebagai SQL mentah.            |
+| Gaya marker lewat `divIcon`                 | Membuat marker emas dan denyut boost bisa ditata dengan CSS yang sama seperti komponen lain.                 |
+| Pembayaran lewat polling status ke penyedia | Status pembayaran ditentukan server penyedia, bukan dari klien, dan tetap bekerja di localhost tanpa tunnel. |
+| Aktivasi boost dipusatkan di satu fungsi    | Jalur polling dan webhook memakai `terapkanStatusPembayaran` yang sama, jadi tidak mungkin berbeda hasil.    |

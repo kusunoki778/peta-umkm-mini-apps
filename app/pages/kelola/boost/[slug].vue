@@ -14,15 +14,20 @@ interface Lapak {
   slug: string
 }
 interface Konfigurasi {
-  serverKeySet: boolean
-  clientKeySet: boolean
-  serverKeySandbox: boolean
-  clientKeySandbox: boolean
-  isProduction: boolean
-  snapScriptUrl: string
+  siap: boolean
+  penyedia: string
+  kunciTerisi: boolean
+  modeSandbox: boolean
+  baseUrlTerisi: boolean
+  webhookSecretTerisi: boolean
 }
-interface SnapWindow extends Window {
-  snap?: { pay: (token: string, options: Record<string, () => void>) => void }
+interface Tagihan {
+  orderId: string
+  amount: number
+  checkoutUrl: string
+  qrImageUrl: string
+  reference: string
+  expiresAt: string | null
 }
 
 const route = useRoute()
@@ -34,12 +39,13 @@ const memuat = ref(true)
 const pesan = ref('')
 const gagal = ref('')
 const sedangBayar = ref(false)
-
-// Snap.js tidak dimuat lewat <script> di head, tapi setelah halaman ini siap.
-// Kita simpan promise-nya supaya klik tombol menunggu sampai window.snap benar
-// benar ada, bukan langsung gagal dengan "layanan belum siap".
-let snapSiap: Promise<boolean> | null = null
 const konfigurasi = ref<Konfigurasi | null>(null)
+const tagihan = ref<Tagihan | null>(null)
+const sedangCek = ref(false)
+
+// Polling jalan sendiri selama halaman terbuka, jadi pembeli tidak perlu menekan
+// apa pun setelah membayar. Ini pengganti webhook di localhost.
+let pewaktu: ReturnType<typeof setInterval> | null = null
 
 const rupiah = (nilai: number) =>
   new Intl.NumberFormat('id-ID', {
@@ -57,26 +63,6 @@ function pesanError(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback
 }
 
-function muatSnap(url: string, clientKey: string) {
-  const win = window as SnapWindow
-  if (win.snap) return Promise.resolve(true)
-  return new Promise<boolean>(resolve => {
-    const existing = document.querySelector<HTMLScriptElement>('script[data-snapjs]')
-    const script = existing ?? document.createElement('script')
-    script.addEventListener('load', () => resolve(Boolean(win.snap)))
-    script.addEventListener('error', () => resolve(false))
-    if (!existing) {
-      script.src = url
-      script.dataset.clientKey = clientKey
-      script.dataset.snapjs = 'true'
-      script.async = true
-      document.head.appendChild(script)
-    }
-  })
-}
-
-// Data paket dimuat lewat useAsyncData supaya pilihan sudah tampil di HTML server,
-// tanpa kedip skeleton. Snap.js tetap dimuat di klien karena butuh objek window.
 const { data: dataAwal, error: errorAwal } = await useAsyncData(
   () => `boost-${slug.value}`,
   async () => {
@@ -99,60 +85,80 @@ if (dataAwal.value) {
 }
 memuat.value = false
 
+/** Tanya status ke server. Server yang meneruskan ke MiomiPay. */
+async function cekStatus(otomatis = false) {
+  if (!tagihan.value || sedangCek.value) return
+  sedangCek.value = true
+  if (!otomatis) pesan.value = 'Memeriksa status pembayaran...'
+  try {
+    const hasil = await $fetch<{ lunas: boolean; aktif: boolean; statusPembayaran: string }>(
+      `/api/payments/${tagihan.value.orderId}/status`,
+    )
+    if (hasil.lunas) {
+      hentikanPolling()
+      pesan.value = 'Pembayaran diterima. Boost sudah aktif.'
+      gagal.value = ''
+      return
+    }
+    if (hasil.statusPembayaran === 'failed') {
+      hentikanPolling()
+      gagal.value = 'Tagihan kedaluwarsa atau dibatalkan. Silakan buat tagihan baru.'
+      return
+    }
+    if (!otomatis) pesan.value = 'Pembayaran belum masuk. Coba lagi setelah membayar.'
+  } catch (error) {
+    if (!otomatis) gagal.value = pesanError(error, 'Status pembayaran gagal diperiksa.')
+  } finally {
+    sedangCek.value = false
+  }
+}
+
+function hentikanPolling() {
+  if (pewaktu) {
+    clearInterval(pewaktu)
+    pewaktu = null
+  }
+}
+
+function mulaiPolling() {
+  hentikanPolling()
+  // 5 detik cukup responsif tanpa membebani server MiomiPay.
+  pewaktu = setInterval(() => cekStatus(true), 5000)
+}
+
 async function bayar() {
   if (!dipilih.value || !lapak.value || sedangBayar.value) return
   pesan.value = ''
   gagal.value = ''
 
-  if (!konfigurasi.value?.clientKeySet) {
+  if (!konfigurasi.value?.siap) {
     gagal.value = 'Kunci pembayaran belum diisi di server. Hubungi pengelola.'
     return
   }
 
   sedangBayar.value = true
   try {
-    const result = await $fetch<{ orderId: string; snapToken: string }>('/api/boosts', {
+    tagihan.value = await $fetch<Tagihan>('/api/boosts', {
       method: 'POST',
       body: { businessId: lapak.value.id, packageId: dipilih.value },
     })
-
-    const siap = await (snapSiap ?? Promise.resolve(false))
-    const win = window as SnapWindow
-    if (!siap || !win.snap) {
-      gagal.value =
-        'Jendela pembayaran Midtrans gagal dimuat. Periksa koneksi lalu muat ulang halaman.'
-      return
-    }
-
-    win.snap.pay(result.snapToken, {
-      onSuccess: () => {
-        pesan.value = 'Pembayaran diterima. Boost aktif setelah Midtrans mengonfirmasi transaksi.'
-      },
-      onPending: () => {
-        pesan.value = 'Pembayaran menunggu konfirmasi.'
-      },
-      onError: () => {
-        gagal.value = 'Pembayaran gagal. Coba lagi.'
-      },
-      onClose: () => {
-        pesan.value = 'Jendela pembayaran ditutup.'
-      },
-    })
+    pesan.value = 'Tagihan dibuat. Pindai QR di bawah untuk membayar.'
+    mulaiPolling()
   } catch (error: unknown) {
-    gagal.value = pesanError(error, 'Checkout gagal dibuat.')
+    gagal.value = pesanError(error, 'Tagihan gagal dibuat.')
   } finally {
     sedangBayar.value = false
   }
 }
 
-onMounted(() => {
-  if (konfigurasi.value?.clientKeySet) {
-    snapSiap = muatSnap(
-      konfigurasi.value.snapScriptUrl,
-      String(useRuntimeConfig().public.midtransClientKey ?? ''),
-    )
-  }
-})
+function batalkan() {
+  hentikanPolling()
+  tagihan.value = null
+  pesan.value = ''
+  gagal.value = ''
+}
+
+onBeforeUnmount(hentikanPolling)
 </script>
 
 <template>
@@ -161,7 +167,7 @@ onMounted(() => {
       >Kembali ke kelola lapak</NuxtLink
     >
     <h1 class="mt-3 font-display text-3xl font-semibold">Boost {{ lapak?.name ?? 'lapakmu' }}</h1>
-    <p class="mt-2 text-muted">Pilih durasi sorotan. Pembayaran diproses Midtrans.</p>
+    <p class="mt-2 text-muted">Pilih durasi sorotan. Pembayaran QRIS diproses MiomiPay.</p>
 
     <div v-if="memuat" class="mt-8 space-y-3" aria-busy="true">
       <div v-for="i in 3" :key="i" class="h-24 animate-pulse rounded-tag bg-surface" />
@@ -173,44 +179,99 @@ onMounted(() => {
     >
       {{ gagal }}
     </div>
+
     <div v-else class="mt-8 space-y-4">
       <p
-        v-if="konfigurasi && (!konfigurasi.serverKeySet || !konfigurasi.clientKeySet)"
+        v-if="konfigurasi && !konfigurasi.siap"
         class="rounded-tag border border-danger/40 bg-surface p-4 text-sm text-danger"
         role="alert"
       >
-        Pembayaran belum bisa diproses karena kunci Midtrans belum lengkap di server ({{
-          konfigurasi.serverKeySet ? '' : 'server key kosong'
-        }}{{ !konfigurasi.serverKeySet && !konfigurasi.clientKeySet ? ', ' : ''
-        }}{{ konfigurasi.clientKeySet ? '' : 'client key kosong' }}). Hubungi pengelola aplikasi.
+        Pembayaran belum bisa diproses karena kunci MiomiPay belum lengkap di server ({{
+          konfigurasi.kunciTerisi ? '' : 'kunci API kosong'
+        }}{{ !konfigurasi.kunciTerisi && !konfigurasi.baseUrlTerisi ? ', ' : ''
+        }}{{ konfigurasi.baseUrlTerisi ? '' : 'alamat API kosong' }}). Hubungi pengelola aplikasi.
       </p>
-      <label
-        v-for="item in paket"
-        :key="item.id"
-        class="block cursor-pointer rounded-tag border p-4 transition hover:border-primary"
-        :class="dipilih === item.id ? 'border-primary bg-primary/5' : 'border-border bg-surface'"
-      >
-        <input v-model="dipilih" type="radio" name="paket" :value="item.id" class="sr-only" />
-        <span class="flex items-center justify-between gap-4"
-          ><span
-            ><strong>{{ item.name }}</strong
-            ><span class="ml-2 text-sm text-muted">{{ item.durationDays }} hari</span></span
-          ><strong class="text-primary">{{ rupiah(item.price) }}</strong></span
+
+      <template v-if="!tagihan">
+        <label
+          v-for="item in paket"
+          :key="item.id"
+          class="block cursor-pointer rounded-tag border p-4 transition hover:border-primary"
+          :class="dipilih === item.id ? 'border-primary bg-primary/5' : 'border-border bg-surface'"
         >
-        <span v-if="item.features?.length" class="mt-2 block text-sm text-muted">{{
-          item.features.join(', ')
-        }}</span>
-      </label>
-      <p v-if="gagal" class="text-sm text-danger" role="alert">{{ gagal }}</p>
-      <p v-if="pesan" class="text-sm text-primary" role="status">{{ pesan }}</p>
-      <button
-        type="button"
-        class="min-h-11 rounded-tag bg-primary px-5 font-semibold text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-        :disabled="!dipilih || sedangBayar || !konfigurasi?.serverKeySet"
-        @click="bayar"
-      >
-        {{ sedangBayar ? 'Menyiapkan pembayaran...' : 'Lanjut ke pembayaran' }}
-      </button>
+          <input v-model="dipilih" type="radio" name="paket" :value="item.id" class="sr-only" />
+          <span class="flex items-center justify-between gap-4"
+            ><span
+              ><strong>{{ item.name }}</strong
+              ><span class="ml-2 text-sm text-muted">{{ item.durationDays }} hari</span></span
+            ><strong class="text-primary">{{ rupiah(item.price) }}</strong></span
+          >
+          <span v-if="item.features?.length" class="mt-2 block text-sm text-muted">{{
+            item.features.join(', ')
+          }}</span>
+        </label>
+        <p v-if="gagal" class="text-sm text-danger" role="alert">{{ gagal }}</p>
+        <button
+          type="button"
+          class="min-h-11 rounded-tag bg-primary px-5 font-semibold text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          :disabled="!dipilih || sedangBayar || !konfigurasi?.siap"
+          @click="bayar"
+        >
+          {{ sedangBayar ? 'Menyiapkan tagihan...' : 'Buat tagihan QRIS' }}
+        </button>
+      </template>
+
+      <section v-else class="rounded-tag border border-border bg-surface p-5">
+        <h2 class="font-display text-xl font-semibold">Pindai QRIS untuk membayar</h2>
+        <p class="mt-1 text-sm text-muted">
+          Nominal {{ rupiah(tagihan.amount) }}. Nomor tagihan
+          <span class="font-mono">{{ tagihan.reference }}</span>.
+        </p>
+
+        <img
+          :src="tagihan.qrImageUrl"
+          alt="Kode QRIS untuk membayar boost"
+          width="280"
+          height="280"
+          class="mx-auto mt-4 size-[280px] rounded-tag border border-border bg-white p-2"
+        />
+
+        <a
+          :href="tagihan.checkoutUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-primary hover:underline"
+        >
+          Buka halaman pembayaran
+        </a>
+
+        <p v-if="pesan" class="mt-3 text-sm text-primary" role="status" aria-live="polite">
+          {{ pesan }}
+        </p>
+        <p v-if="gagal" class="mt-3 text-sm text-danger" role="alert">{{ gagal }}</p>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            class="min-h-11 rounded-tag bg-primary px-5 font-semibold text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            :disabled="sedangCek"
+            @click="cekStatus(false)"
+          >
+            {{ sedangCek ? 'Memeriksa...' : 'Saya sudah bayar' }}
+          </button>
+          <button
+            type="button"
+            class="min-h-11 rounded-tag border border-border px-5 font-semibold hover:border-muted"
+            @click="batalkan"
+          >
+            Batalkan tagihan
+          </button>
+        </div>
+        <p class="mt-3 text-xs text-muted">
+          Status diperiksa otomatis tiap 5 detik. Halaman ini boleh ditutup; boost tetap aktif
+          setelah pembayaran diterima.
+        </p>
+      </section>
     </div>
   </div>
 </template>

@@ -62,18 +62,19 @@ Estimasi: 4 sampai 5 hari.
 ## Fase 4 - Boost dan Pembayaran
 
 - [x] Tabel dan data paket boost
-- [x] Endpoint pembuatan boost dan Snap token
+- [x] Endpoint pembuatan boost dan tagihan QRIS MiomiPay
 - [x] Halaman pemilihan paket dan checkout
-- [x] Integrasi Snap di klien
-- [x] Endpoint webhook dengan verifikasi tanda tangan
-- [x] Aktivasi boost yang idempoten
+- [x] Halaman pembayaran QRIS dengan gambar QR dan tautan halaman MiomiPay
+- [x] Endpoint webhook dengan verifikasi HMAC-SHA256 (`X-MiomiPay-Signature`)
+- [x] Aktivasi boost yang idempoten, dipusatkan di `server/utils/pembayaran.ts`
 - [x] Marker emas dan gaya boost di daftar
 - [x] Urutan daftar: boost lebih dulu
 - [x] Penonaktifan otomatis saat boost berakhir
 - [x] Riwayat boost untuk pemilik
-- [ ] Pengecekan status transaksi sebagai cadangan (butuh izin Core API `Read`; saat ini hanya `Snap Checkout: Write`, jadi panggilan `/v2/<order_id>/status` dijawab 403)
+- [x] Pengecekan status transaksi lewat polling ke MiomiPay, tanpa butuh tunnel
+- [x] Polling otomatis tiap 5 detik di halaman boost, plus tombol "Saya sudah bayar"
 - [x] Halaman boost memeriksa kesiapan kunci lewat `/api/payments/config`
-- [x] Pesan error Midtrans diteruskan ke UI, bukan gagal senyap
+- [x] Pesan error penyedia pembayaran diteruskan ke UI, bukan gagal senyap
 
 Estimasi: 4 sampai 5 hari.
 

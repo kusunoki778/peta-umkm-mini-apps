@@ -1,4 +1,6 @@
 // Uji regresi penuh terhadap build produksi di port 3111.
+import { readFileSync } from 'node:fs'
+
 const BASE = 'http://127.0.0.1:3111'
 let pass = 0,
   fail = 0
@@ -40,12 +42,18 @@ async function call(path, options = {}) {
 
 // --- konfigurasi pembayaran ---
 const cfg = await call('/api/payments/config')
-cek('config: server key terbaca', cfg.json?.serverKeySet === true, JSON.stringify(cfg.json))
-cek('config: client key terbaca', cfg.json?.clientKeySet === true)
-cek('config: mode sandbox', cfg.json?.serverKeySandbox === true)
+cek('config: penyedia MiomiPay', cfg.json?.penyedia === 'MiomiPay', JSON.stringify(cfg.json))
+cek('config: kunci API terbaca', cfg.json?.kunciTerisi === true)
+cek('config: alamat API terbaca', cfg.json?.baseUrlTerisi === true)
+cek('config: mode sandbox', cfg.json?.modeSandbox === true)
+// Kunci API tidak boleh ikut terkirim ke peramban dalam bentuk apa pun.
+const kunciAsli = (readFileSync('.env', 'utf8').match(/^MIOMIPAY_SANDBOX_KEY=(.*)$/m)?.[1] ?? '')
+  .trim()
+  .replace(/^"|"$/g, '')
 cek(
   'config: tidak membocorkan kunci',
-  !cfg.text.includes('SB-Mid-server') && !cfg.text.includes('SB-Mid-client'),
+  Boolean(kunciAsli) && !cfg.text.includes(kunciAsli) && !cfg.text.includes('whsec_'),
+  'kunci API atau webhook secret ikut terkirim',
 )
 
 // --- publik ---
@@ -107,8 +115,12 @@ cek('halaman kelola tanpa em dash', !kelola.text.includes('\u2014'))
 
 const halamanBoost = await call('/kelola/boost/warung-bu-sari')
 cek('halaman boost 200', halamanBoost.status === 200, String(halamanBoost.status))
-cek('halaman boost ada tombol bayar', halamanBoost.text.includes('Lanjut ke pembayaran'))
+cek('halaman boost ada tombol buat tagihan', halamanBoost.text.includes('Buat tagihan QRIS'))
 cek('halaman boost tanpa em dash', !halamanBoost.text.includes('\u2014'))
+cek(
+  'halaman boost tidak memuat Snap Midtrans',
+  !/snap\.js|app\.sandbox\.midtrans/.test(halamanBoost.text),
+)
 
 // --- checkout boost sungguhan ---
 const paket = await call('/api/boost-packages')
@@ -129,13 +141,27 @@ cek(
   `${checkout.status} ${checkout.text.slice(0, 200)}`,
 )
 cek(
-  'checkout dapat snapToken',
-  typeof checkout.json?.snapToken === 'string' && checkout.json.snapToken.length > 10,
+  'checkout dapat referensi MiomiPay',
+  typeof checkout.json?.reference === 'string' && checkout.json.reference.startsWith('MP-'),
+  String(checkout.json?.reference),
+)
+cek(
+  'checkout dapat QRIS gambar',
+  typeof checkout.json?.qrImageUrl === 'string' && checkout.json.qrImageUrl.length > 10,
 )
 cek(
   'checkout dapat orderId',
   typeof checkout.json?.orderId === 'string' && checkout.json.orderId.startsWith('boost-'),
 )
+
+// Status tagihan harus bisa ditanyakan pemiliknya sendiri.
+const statusBayar = await call(`/api/payments/${checkout.json?.orderId}/status`)
+cek(
+  'cek status pembayaran 200',
+  statusBayar.status === 200,
+  `${statusBayar.status} ${statusBayar.text.slice(0, 200)}`,
+)
+cek('status awal belum lunas', statusBayar.json?.lunas === false, String(statusBayar.json?.lunas))
 
 // lapak yang sudah punya boost aktif harus ditolak
 const detailKafe = await call('/api/businesses/kafe-kopi-ruang')
@@ -145,18 +171,23 @@ const dobel = await call('/api/boosts', {
 })
 cek('boost dobel ditolak 409', dobel.status === 409, `${dobel.status} ${dobel.text.slice(0, 160)}`)
 
-// --- webhook: signature salah ditolak ---
+// --- webhook: tanda tangan salah ditolak ---
 const webhookSalah = await call('/api/payments/notification', {
   method: 'POST',
   body: JSON.stringify({
-    order_id: 'x',
-    status_code: '200',
-    gross_amount: '15000.00',
-    signature_key: 'palsu',
-    transaction_status: 'settlement',
+    event: 'payment.success',
+    data: { reference: 'x', external_id: 'boost-palsu', status: 'PAID' },
   }),
+  headers: { 'x-miomipay-signature': 'palsu' },
 })
-cek('webhook signature salah 401', webhookSalah.status === 401, String(webhookSalah.status))
+cek('webhook tanda tangan salah 401', webhookSalah.status === 401, String(webhookSalah.status))
+
+// Tanpa header tanda tangan sama sekali juga harus ditolak.
+const webhookKosong = await call('/api/payments/notification', {
+  method: 'POST',
+  body: JSON.stringify({ data: { external_id: 'boost-palsu', status: 'PAID' } }),
+})
+cek('webhook tanpa tanda tangan 401', webhookKosong.status === 401, String(webhookKosong.status))
 
 // --- admin dengan sesi pemilik ditolak ---
 const adminSebagaiPemilik = await call('/api/admin/businesses')
