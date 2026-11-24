@@ -5,7 +5,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxt/fonts', '@nuxt/eslint', 'nuxt-auth-utils'],
   runtimeConfig: {
-    midtransServerKey: '',
+    // Kunci ini dibaca Nitro dari env dengan nama NUXT_MIDTRANS_SERVER_KEY.
+    // Nilai di bawah hanya cadangan saat env tidak ada, dan sengaja memakai
+    // process.env supaya nama lama (MIDTRANS_SERVER_KEY) tetap terbaca.
+    midtransServerKey: process.env.NUXT_MIDTRANS_SERVER_KEY ?? process.env.MIDTRANS_SERVER_KEY ?? '',
     // nuxt-auth-utils menyetel cookie sesi `Secure` secara bawaan. Saat pratinjau
     // build produksi di mesin lokal, aplikasi disajikan lewat http, jadi cookie
     // itu ditolak browser dan pengguna tidak pernah benar-benar masuk.
@@ -17,8 +20,8 @@ export default defineNuxtConfig({
       },
     },
     public: {
-      midtransClientKey: '',
-      midtransIsProduction: false,
+      midtransClientKey: process.env.NUXT_PUBLIC_MIDTRANS_CLIENT_KEY ?? '',
+      midtransIsProduction: process.env.NUXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true',
     },
   },
   css: ['~/assets/css/main.css'],

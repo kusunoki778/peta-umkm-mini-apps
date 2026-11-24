@@ -33,6 +33,16 @@ onMounted(() => {
   peta.on('click', (event: L.LeafletMouseEvent) => pasangPenanda(event.latlng.lat, event.latlng.lng))
 })
 
+watch(
+  () => [props.latitude, props.longitude] as const,
+  ([latitude, longitude]) => {
+    if (!peta || latitude === null || latitude === undefined || longitude === null || longitude === undefined) return
+    peta.setView([latitude, longitude], Math.max(peta.getZoom(), 15))
+    penanda?.remove()
+    penanda = L.marker([latitude, longitude]).addTo(peta)
+  },
+)
+
 onBeforeUnmount(() => {
   peta?.remove()
   peta = null

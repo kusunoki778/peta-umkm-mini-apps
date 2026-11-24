@@ -2,7 +2,7 @@
 
 Peta interaktif untuk menemukan tempat makan, kos, dan jasa di sekitar kampus. Pemilik usaha bisa mendaftarkan lapaknya, lalu membayar paket boost supaya lapaknya menonjol di peta dan muncul di atas daftar rekomendasi.
 
-Status proyek: **kerangka aplikasi berjalan**. Dokumen desain, PRD, arsitektur, dan task list sudah tersusun, dan Fase 0 (scaffold Nuxt 4, Tailwind, Prisma) selesai. Fitur produk belum dikerjakan. Tangkapan layar dan tautan demo akan ditambahkan setelah peta berjalan.
+Status proyek: **Fase 0 sampai 5 selesai**. Peta interaktif, pencarian, filter kategori, CRUD lapak, boost berbayar lewat Midtrans Snap, webhook, dan panel admin sudah berjalan. Belum ada: unggah foto lapak, deployment, tangkapan layar, dan studi kasus.
 
 ## Masalah yang Dipecahkan
 
@@ -47,28 +47,40 @@ Pemilik -> Pilih paket -> Server buat Snap token -> Midtrans Snap (bayar)
 
 ## Menjalankan Proyek
 
-Butuh Node.js 20 atau lebih baru, dan PostgreSQL dengan ekstensi PostGIS aktif.
+Butuh Node.js 20 atau lebih baru, dan PostgreSQL 14 atau lebih baru dengan ekstensi `cube` dan `earthdistance` aktif (keduanya bawaan contrib, tanpa PostGIS).
 
 ```bash
 npm install
 cp .env.example .env        # Windows: copy .env.example .env
-# lalu isi DATABASE_URL dan NUXT_SESSION_PASSWORD di .env
+# lalu isi DATABASE_URL, NUXT_APP_SECRET, dan kunci Midtrans di .env
 npm run db:generate         # generate Prisma Client
-npm run db:migrate          # buat tabel (butuh PostgreSQL + PostGIS aktif)
+npm run db:migrate          # buat tabel dan aktifkan ekstensi geospasial
+npm run db:seed             # isi data contoh (opsional)
 npm run dev                 # buka http://localhost:3000
 ```
 
+Isi `.env` untuk pembayaran boost:
+
+```
+MIDTRANS_SERVER_KEY=SB-Mid-server-...
+NUXT_PUBLIC_MIDTRANS_CLIENT_KEY=SB-Mid-client-...
+NUXT_PUBLIC_MIDTRANS_IS_PRODUCTION=false
+```
+
+Kunci sandbox diambil dari dashboard Midtrans. Izin yang dibutuhkan cukup **Snap Checkout: Write**. Bila kunci belum diisi, halaman boost menampilkan peringatan dan tidak mengirim permintaan ke Midtrans.
+
 Skrip lain: `npm run build`, `npm run lint`, `npm run typecheck`, `npm run db:studio`.
 
-Saat ini aplikasi baru menampilkan kerangka halaman. Peta, autentikasi, dan alur boost menyusul pada fase berikutnya (lihat [docs/04-task-list.md](docs/04-task-list.md)).
+Untuk menerima webhook pembayaran di mesin lokal, jalankan `ngrok http 3000` lalu isi Payment Notification URL di dashboard Midtrans dengan `https://<url-ngrok>/api/payments/notification`.
 
 ## Rencana Selanjutnya
 
 - [x] Scaffold proyek dan token desain
-- [ ] Autentikasi dan CRUD lapak
-- [ ] Peta dan pencarian
-- [ ] Boost dan pembayaran
-- [ ] Panel admin
+- [x] Autentikasi dan CRUD lapak
+- [x] Peta dan pencarian
+- [x] Boost dan pembayaran
+- [x] Panel admin
+- [ ] Unggah foto lapak
 - [ ] Deployment, tangkapan layar, dan studi kasus
 
 ## Lisensi

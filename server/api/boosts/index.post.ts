@@ -26,6 +26,14 @@ export default defineEventHandler(async (event) => {
       prisma.payment.update({ where: { id: payment.id }, data: { status: 'failed' } }),
       prisma.boost.update({ where: { id: boost.id }, data: { status: 'failed' } }),
     ])
-    throw error
+    // Teruskan pesan asli dari utils/midtrans supaya UI bisa menampilkan sebabnya.
+    const detail = (error as { data?: { message?: string } })?.data?.message
+      ?? (error as { statusMessage?: string })?.statusMessage
+      ?? 'Pembayaran gagal disiapkan.'
+    throw createError({
+      statusCode: (error as { statusCode?: number })?.statusCode ?? 502,
+      statusMessage: detail,
+      data: { message: detail },
+    })
   }
 })

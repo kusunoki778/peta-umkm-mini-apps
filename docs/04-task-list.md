@@ -71,7 +71,9 @@ Estimasi: 4 sampai 5 hari.
 - [x] Urutan daftar: boost lebih dulu
 - [x] Penonaktifan otomatis saat boost berakhir
 - [x] Riwayat boost untuk pemilik
-- [x] Pengecekan status transaksi sebagai cadangan
+- [ ] Pengecekan status transaksi sebagai cadangan (butuh izin Core API `Read`; saat ini hanya `Snap Checkout: Write`, jadi panggilan `/v2/<order_id>/status` dijawab 403)
+- [x] Halaman boost memeriksa kesiapan kunci lewat `/api/payments/config`
+- [x] Pesan error Midtrans diteruskan ke UI, bukan gagal senyap
 
 Estimasi: 4 sampai 5 hari.
 

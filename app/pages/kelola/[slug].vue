@@ -227,7 +227,7 @@ function rupiah(value: number | null) {
         {{ pesanError }}
       </p>
 
-      <NuxtLink :to="`/kelola/${route.params.slug}/boost`" class="mt-6 inline-flex min-h-11 items-center rounded-tag bg-accent px-4 font-semibold text-ink hover:bg-accent/80">
+      <NuxtLink :to="`/kelola/boost/${route.params.slug}`" class="mt-6 inline-flex min-h-11 items-center rounded-tag bg-accent px-4 font-semibold text-ink hover:bg-accent/80">
         Boost lapak
       </NuxtLink>
 

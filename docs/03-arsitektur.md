@@ -209,6 +209,7 @@ Endpoint REST lewat `server/api`. Semua respons JSON. Validasi input dengan Zod.
 | GET | `/api/categories` | publik | Daftar kategori. |
 | GET | `/api/boost-packages` | publik | Daftar paket boost. |
 | POST | `/api/boosts` | pemilik | Buat transaksi boost dan Snap token. |
+| GET | `/api/payments/config` | publik | Status kesiapan kunci Midtrans (tanpa membocorkan nilainya). |
 | POST | `/api/payments/notification` | Midtrans | Webhook pembayaran. Verifikasi tanda tangan. |
 | GET | `/api/boosts/mine` | pemilik | Riwayat boost saya. |
 | GET | `/api/admin/businesses` | admin | Daftar lapak untuk moderasi. |
@@ -251,7 +252,7 @@ Contoh bentuk respons daftar:
 ## 9. Pembayaran (Midtrans)
 
 1. Pemilik memilih paket. Server membuat `order_id` unik dan menyimpan baris `payments` serta `boosts` berstatus `pending`.
-2. Server memanggil Snap untuk membuat token, lalu mengirim token ke klien.
+2. Server memanggil Snap untuk membuat token, lalu mengirim token ke klien. Endpoint yang benar adalah `POST /snap/v1/transactions` (`app.sandbox.midtrans.com` untuk uji, `app.midtrans.com` untuk produksi). Path `/snap/v1/token` tidak ada dan akan menjawab 404.
 3. Klien memanggil `snap.pay(token)`.
 4. Midtrans mengirim webhook ke `/api/payments/notification`.
 5. Server memverifikasi tanda tangan: SHA-512 dari `order_id + status_code + gross_amount + server_key`.
@@ -260,6 +261,13 @@ Contoh bentuk respons daftar:
 8. Pengecekan status transaksi ke Midtrans disediakan sebagai cadangan bila webhook tidak sampai.
 
 Kunci server hanya dipakai di server, tidak pernah dikirim ke klien. Kunci klien boleh dipakai di peramban untuk Snap.
+
+Izin Midtrans yang dibutuhkan untuk alur ini cukup satu: **Snap Checkout `Write`**. Izin Core API sengaja dibiarkan `None`, sehingga memanggil `GET /v2/<order_id>/status` akan dijawab `403 Access denied`. Karena itu pengecekan status cadangan pada poin 8 belum bisa dipakai selama izin itu belum dinyalakan; webhook menjadi jalur aktivasi boost yang sebenarnya. Halaman `/api/payments/config` mengembalikan status kesiapan kunci (terisi atau tidak, sandbox atau produksi) tanpa membocorkan nilainya, dan halaman boost memakainya untuk menampilkan peringatan yang jelas alih-alih gagal senyap.
+
+Dua jebakan yang sudah ditemui dan harus dijaga:
+
+- Parameter nama rute: semua berkas di `server/api/businesses/` memakai satu nama parameter `:key` yang menerima id maupun slug. Mencampur `[id]` dan `[slug]` di posisi segmen yang sama membuat router Nitro gagal mencocokkan rute bersarang, dan gejalanya menyesatkan: request jatuh ke renderer Vue dengan 404 halaman, bukan 404 API.
+- Rute halaman boost berada di `app/pages/kelola/boost/[slug].vue` (URL `/kelola/boost/<slug>`). Versi lama, `app/pages/kelola/[slug]/boost.vue`, tidak pernah dirender karena kalah prioritas oleh `kelola/[slug].vue`; halaman boost tampak "kosong" padahal yang terbuka adalah halaman kelola lapak.
 
 ## 10. Unggah Foto
 

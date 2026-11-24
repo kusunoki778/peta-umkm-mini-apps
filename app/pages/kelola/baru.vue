@@ -31,6 +31,7 @@ const form = reactive<FormState>({
 
 const errorMessage = ref('')
 const submitting = ref(false)
+const searchingLocation = ref(false)
 
 const canSubmit = computed(() =>
   form.name.trim().length >= 2
@@ -56,6 +57,34 @@ function useCurrentLocation() {
     },
     { enableHighAccuracy: true, timeout: 10000 },
   )
+}
+
+async function searchLocation() {
+  const query = form.address.trim()
+  if (query.length < 3) {
+    errorMessage.value = 'Isi alamat atau nama lokasi minimal 3 karakter dulu.'
+    return
+  }
+  searchingLocation.value = true
+  errorMessage.value = ''
+  try {
+    const results = await $fetch<{ lat: string, lon: string, display_name: string }[]>('https://nominatim.openstreetmap.org/search', {
+      query: { q: query, format: 'jsonv2', limit: 1, 'accept-language': 'id' },
+      headers: { Accept: 'application/json' },
+    })
+    const result = results[0]
+    if (!result) {
+      errorMessage.value = 'Lokasi tidak ditemukan. Coba tambah kota atau negara.'
+      return
+    }
+    form.latitude = Number(result.lat).toFixed(6)
+    form.longitude = Number(result.lon).toFixed(6)
+    form.address = result.display_name
+  } catch {
+    errorMessage.value = 'Pencarian lokasi gagal. Coba lagi atau pilih titik langsung di peta.'
+  } finally {
+    searchingLocation.value = false
+  }
 }
 
 async function submit() {
@@ -138,13 +167,21 @@ async function submit() {
         />
       </div>
 
-      <AppField
-        id="lapak-alamat"
+        <AppField
+          id="lapak-alamat"
         v-model="form.address"
         label="Alamat"
         required
         hint="Tulis patokan yang mudah dicari, misalnya nama gang atau bangunan terdekat."
-      />
+        />
+        <button
+          type="button"
+          class="min-h-11 rounded-lg border border-primary px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+          :disabled="searchingLocation"
+          @click="searchLocation"
+        >
+          {{ searchingLocation ? 'Mencari lokasi...' : 'Cari lokasi di peta' }}
+        </button>
 
       <div class="grid gap-5 sm:grid-cols-2">
         <AppField id="lapak-telepon" v-model="form.phone" label="Telepon" type="tel" />
